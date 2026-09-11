@@ -80,6 +80,26 @@ class KycFlowTest extends TestCase
         Storage::disk('public')->assertExists($document->selfie_path);
     }
 
+    // Régression : `postJson()` ci-dessus encode les champs non-fichiers en
+    // JSON (vrai booléen PHP préservé), contrairement à l'app réelle qui
+    // envoie un vrai `multipart/form-data` (dio `FormData`) où
+    // `hasClientSideAnomaly` arrive forcément comme la chaîne "false"/"true"
+    // — ce que la règle `boolean` de Laravel rejetait avant
+    // `SubmitDocumentsRequest::prepareForValidation()`. `->post()` (pas
+    // `->postJson()`) reproduit ce multipart réel.
+    public function test_submit_documents_accepts_a_stringified_boolean_from_a_real_multipart_request(): void
+    {
+        $response = $this->post('/api/kyc/documents', [
+            'documentType' => 'nationalId',
+            'front' => UploadedFile::fake()->image('front.jpg'),
+            'selfie' => UploadedFile::fake()->image('selfie.jpg'),
+            'hasClientSideAnomaly' => 'false',
+        ], $this->authHeader());
+
+        $response->assertStatus(202)->assertJson(['status' => 'pending']);
+        $this->assertSame('pending', $this->account->fresh()->kyc_status->value);
+    }
+
     public function test_submit_documents_with_anomaly_sets_review_status(): void
     {
         $this->postJson('/api/kyc/documents', [

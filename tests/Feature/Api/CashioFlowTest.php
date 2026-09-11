@@ -390,6 +390,77 @@ class CashioFlowTest extends TestCase
         ], $this->authHeader($account))->assertStatus(402);
     }
 
+    public function test_cashout_via_wave_debits_the_balance_when_the_payout_succeeds_immediately(): void
+    {
+        Http::fake([
+            'api.wave.com/v1/payout' => Http::response([
+                'id' => 'pt-1', 'status' => 'succeeded', 'receive_amount' => '4000', 'fee' => '40',
+            ]),
+        ]);
+        $provider = $this->waveProvider();
+        $account = $this->account('+221771111111', 10000);
+
+        $response = $this->postJson('/api/cashout', [
+            'providerId' => $provider->id, 'amountXof' => 4000, 'pin' => '123456',
+        ], $this->authHeader($account))->assertStatus(202)->json();
+
+        $this->assertSame('completed', $response['status']);
+        $this->assertSame(6000, $account->fresh()->balance_xof);
+    }
+
+    public function test_cashout_via_wave_does_not_debit_when_the_payout_fails(): void
+    {
+        Http::fake([
+            'api.wave.com/v1/payout' => Http::response(['id' => 'pt-2', 'status' => 'failed']),
+        ]);
+        $provider = $this->waveProvider();
+        $account = $this->account('+221771111111', 10000);
+
+        $response = $this->postJson('/api/cashout', [
+            'providerId' => $provider->id, 'amountXof' => 4000, 'pin' => '123456',
+        ], $this->authHeader($account))->assertStatus(202)->json();
+
+        $this->assertSame('failed', $response['status']);
+        $this->assertSame(10000, $account->fresh()->balance_xof);
+    }
+
+    public function test_cashout_via_wave_does_not_debit_while_the_payout_is_processing(): void
+    {
+        Http::fake([
+            'api.wave.com/v1/payout' => Http::response(['id' => 'pt-3', 'status' => 'processing']),
+        ]);
+        $provider = $this->waveProvider();
+        $account = $this->account('+221771111111', 10000);
+
+        $response = $this->postJson('/api/cashout', [
+            'providerId' => $provider->id, 'amountXof' => 4000, 'pin' => '123456',
+        ], $this->authHeader($account))->assertStatus(202)->json();
+
+        $this->assertSame('pending', $response['status']);
+        $this->assertSame(10000, $account->fresh()->balance_xof);
+        $this->assertSame('pt-3', Transaction::first()->provider_reference);
+    }
+
+    public function test_finalize_wave_payouts_command_completes_a_processing_transaction(): void
+    {
+        Http::fake([
+            'api.wave.com/v1/payout' => Http::response(['id' => 'pt-4', 'status' => 'processing']),
+            'api.wave.com/v1/payout/pt-4' => Http::response(['id' => 'pt-4', 'status' => 'succeeded']),
+        ]);
+        $provider = $this->waveProvider();
+        $account = $this->account('+221771111111', 10000);
+
+        $this->postJson('/api/cashout', [
+            'providerId' => $provider->id, 'amountXof' => 4000, 'pin' => '123456',
+        ], $this->authHeader($account))->assertStatus(202);
+        $this->assertSame(10000, $account->fresh()->balance_xof);
+
+        $this->artisan('wave:finalize-payouts')->assertExitCode(0);
+
+        $this->assertSame('completed', Transaction::first()->fresh()->status->value);
+        $this->assertSame(6000, $account->fresh()->balance_xof);
+    }
+
     public function test_pay_merchant_never_fakes_success(): void
     {
         $account = $this->account('+221771111111');

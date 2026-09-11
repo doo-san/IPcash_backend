@@ -15,6 +15,7 @@ use App\Models\Account;
 use App\Models\FeeRule;
 use App\Models\MobileMoneyProvider;
 use App\Models\PromoCode;
+use App\Models\Transaction;
 use App\Services\OrangeMoney\OrangeMoneyClient;
 use App\Services\Wave\WaveClient;
 use Illuminate\Http\JsonResponse;
@@ -32,7 +33,9 @@ use Throwable;
 // Exception : Orange Money et Wave sont réellement branchés
 // (`OrangeMoneyClient`, `WaveClient`, voir `cashinViaWebRedirect`) — pour
 // ces prestataires précis, le dépôt suit le cycle pending→completed/failed
-// normal au lieu d'être simulé.
+// normal au lieu d'être simulé. Wave a en plus un retrait réel
+// (`cashoutViaWave`, API Payout) ; Orange Money n'a que le dépôt pour
+// l'instant (pas de documentation de retrait fournie).
 //
 // Frais (FeeRule, scopes cashIn/cashOut) : 0 par défaut tant qu'aucune
 // règle active n'existe pour le scope (voir FeeRule::computeFor) — même
@@ -229,6 +232,14 @@ class CashioController extends Controller
             return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde insuffisant pour effectuer cette opération.'], 402);
         }
 
+        // Wave est le seul opérateur mobile money avec un retrait réellement
+        // branché (WaveClient::sendPayout) — Orange Money (dépôt seulement
+        // pour l'instant) et Mixx by Yas restent sur la simulation interne.
+        $provider = MobileMoneyProvider::find($data['providerId']);
+        if ($provider?->isWave() && $provider->isConfigured()) {
+            return $this->cashoutViaWave($account, $provider, $amountXof, $feeXof, $totalXof, $promoCode, $idempotencyKey);
+        }
+
         $transaction = DB::transaction(function () use ($account, $totalXof, $feeXof, $promoCode, $idempotencyKey) {
             $account->decrement('balance_xof', $totalXof);
             $promoCode?->increment('redemptions_count');
@@ -244,6 +255,82 @@ class CashioController extends Controller
         });
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
+    }
+
+    // Retrait Wave réel : contrairement au dépôt (Checkout, redirection
+    // web), `POST /v1/payout` déplace l'argent immédiatement — pas d'étape
+    // de confirmation côté client, donc pas de `paymentUrl` ici. Le solde
+    // n'est débité qu'après avoir la confirmation `succeeded` de Wave
+    // (jamais avant, règle 3) ; `processing` (pas de webhook payout
+    // documenté) laisse la transaction `pending`, avec l'id Wave dans
+    // `provider_reference` pour que `wave:finalize-payouts` puisse la
+    // relancer plus tard.
+    private function cashoutViaWave(
+        Account $account,
+        MobileMoneyProvider $provider,
+        int $amountXof,
+        int $feeXof,
+        int $totalXof,
+        ?PromoCode $promoCode,
+        ?string $idempotencyKey,
+    ): JsonResponse {
+        $transaction = $account->transactions()->create([
+            'type' => TransactionType::CashOut,
+            'status' => 'pending',
+            'amount_xof' => -$totalXof,
+            'fee_xof' => $feeXof,
+            'reference' => 'CASHOUT-'.strtoupper(Str::random(10)),
+            'idempotency_key' => $idempotencyKey,
+        ]);
+
+        try {
+            $result = (new WaveClient($provider))->sendPayout(
+                amountXof: $amountXof,
+                mobile: $account->phone_number,
+            );
+        } catch (Throwable $e) {
+            $transaction->update(['status' => 'failed', 'failure_reason' => $e->getMessage()]);
+
+            return response()->json((new TransactionResource($transaction->fresh()))->resolve(), 202);
+        }
+
+        $this->applyWavePayoutStatus($transaction, $account, $totalXof, $promoCode, $result['status'], $result['id']);
+
+        return response()->json((new TransactionResource($transaction->fresh()))->resolve(), 202);
+    }
+
+    // Partagé avec `FinalizeWavePayouts` (relance sur un payout resté
+    // `processing`) pour ne pas dupliquer la logique de transition d'état.
+    public function applyWavePayoutStatus(
+        Transaction $transaction,
+        Account $account,
+        int $totalXof,
+        ?PromoCode $promoCode,
+        string $waveStatus,
+        string $payoutId,
+    ): void {
+        if ($waveStatus === 'succeeded') {
+            DB::transaction(function () use ($account, $totalXof, $promoCode, $transaction) {
+                $account->decrement('balance_xof', $totalXof);
+                $promoCode?->increment('redemptions_count');
+                $transaction->update(['status' => 'completed', 'provider_reference' => null]);
+            });
+
+            return;
+        }
+
+        if ($waveStatus === 'failed' || $waveStatus === 'reversed') {
+            $transaction->update([
+                'status' => 'failed',
+                'failure_reason' => 'Le versement Wave a échoué.',
+                'provider_reference' => null,
+            ]);
+
+            return;
+        }
+
+        // `processing` : on ne débite rien tant que ce n'est pas confirmé.
+        $transaction->update(['provider_reference' => $payoutId]);
     }
 
     /**

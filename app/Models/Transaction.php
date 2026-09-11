@@ -30,6 +30,7 @@ class Transaction extends Model
         'counterparty_phone_number',
         'note',
         'reference',
+        'provider_reference',
         'idempotency_key',
         'failure_reason',
         'foreign_currency_code',

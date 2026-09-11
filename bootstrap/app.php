@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureAccountIsNotBlocked;
 use App\Http\Middleware\EnsureIdempotencyKey;
 use App\Http\Middleware\EnsureValidSessionToken;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
+    ->withSchedule(function (Schedule $schedule): void {
+        // Voir FinalizeWavePayouts : l'API Payout de Wave n'a pas de
+        // webhook documenté, contrairement à Checkout.
+        $schedule->command('wave:finalize-payouts')->everyFiveMinutes();
+    })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'session.token' => EnsureValidSessionToken::class,

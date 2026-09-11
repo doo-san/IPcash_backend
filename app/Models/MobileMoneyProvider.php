@@ -55,11 +55,16 @@ class MobileMoneyProvider extends Model
     }
 
     // Pas de colonne `type`/slug dédiée sur ce référentiel (à la différence
-    // de `BillProvider`) : un seul prestataire réel branché pour l'instant
-    // (OrangeMoneyClient), donc reconnu par son nom plutôt que d'ajouter une
-    // colonne pour un seul cas d'usage.
+    // de `BillProvider`) : seulement deux prestataires réels branchés pour
+    // l'instant (OrangeMoneyClient, WaveClient), donc reconnus par leur nom
+    // plutôt que d'ajouter une colonne pour deux cas d'usage.
     public function isOrangeMoney(): bool
     {
         return str_contains(strtolower($this->name), 'orange');
+    }
+
+    public function isWave(): bool
+    {
+        return str_contains(strtolower($this->name), 'wave');
     }
 }

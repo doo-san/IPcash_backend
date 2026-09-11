@@ -8,9 +8,11 @@ use App\Models\FeeRule;
 use App\Models\MobileMoneyProvider;
 use App\Models\PromoCode;
 use App\Models\Transaction;
+use App\Services\Wave\WaveSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class CashioFlowTest extends TestCase
@@ -152,6 +154,127 @@ class CashioFlowTest extends TestCase
         ])->assertOk();
 
         $this->assertSame(0, Transaction::count());
+    }
+
+    private function waveProvider(): MobileMoneyProvider
+    {
+        return MobileMoneyProvider::create([
+            'name' => 'Wave',
+            'min_amount_xof' => 100,
+            'max_amount_xof' => 1000000,
+            'flow' => 'redirect',
+            'country_dial_code' => '+221',
+            'currency_code' => 'XOF',
+            'api_base_url' => 'https://api.wave.com',
+            'api_key' => 'test-wave-api-key',
+            'api_secret' => 'test-wave-signing-secret',
+            'is_live' => true,
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function postSignedWaveWebhook(array $data): TestResponse
+    {
+        $body = json_encode($data);
+        $signature = WaveSignature::header('test-wave-signing-secret', $body);
+
+        return $this->postJson('/api/webhooks/wave', $data, ['Wave-Signature' => $signature]);
+    }
+
+    public function test_cashin_via_wave_creates_a_pending_transaction_and_returns_a_payment_url(): void
+    {
+        Http::fake([
+            'api.wave.com/v1/checkout/sessions' => Http::response([
+                'id' => 'cos-123', 'wave_launch_url' => 'https://pay.wave.com/c/cos-123',
+            ]),
+        ]);
+        $provider = $this->waveProvider();
+        $account = $this->account('+221771111111', 0);
+
+        $response = $this->postJson('/api/cashin', [
+            'providerId' => $provider->id, 'sourcePhoneNumber' => '+221771111111', 'amountXof' => 5000,
+        ], $this->authHeader($account))->assertStatus(202)->json();
+
+        $this->assertSame('pending', $response['status']);
+        $this->assertSame('https://pay.wave.com/c/cos-123', $response['paymentUrl']);
+        $this->assertSame(0, $account->fresh()->balance_xof);
+    }
+
+    public function test_cashin_via_wave_records_a_failed_transaction_when_the_provider_errors(): void
+    {
+        Http::fake([
+            'api.wave.com/v1/checkout/sessions' => Http::response(['message' => 'invalid-amount'], 400),
+        ]);
+        $provider = $this->waveProvider();
+        $account = $this->account('+221771111111', 0);
+
+        $response = $this->postJson('/api/cashin', [
+            'providerId' => $provider->id, 'sourcePhoneNumber' => '+221771111111', 'amountXof' => 5000,
+        ], $this->authHeader($account))->assertStatus(202)->json();
+
+        $this->assertSame('failed', $response['status']);
+        $this->assertStringContainsString('invalid-amount', $response['failureReason']);
+        $this->assertSame(0, $account->fresh()->balance_xof);
+    }
+
+    public function test_wave_webhook_completes_a_pending_cashin_and_credits_the_balance(): void
+    {
+        $this->waveProvider();
+        $account = $this->account('+221771111111', 0);
+        $transaction = $account->transactions()->create([
+            'type' => 'cashIn', 'status' => 'pending', 'amount_xof' => 5000,
+            'reference' => 'CASHIN-WAVETEST01',
+        ]);
+
+        $this->postSignedWaveWebhook([
+            'id' => 'EV_1', 'type' => 'checkout.session.completed',
+            'data' => ['id' => 'cos-1', 'client_reference' => 'CASHIN-WAVETEST01', 'payment_status' => 'succeeded'],
+        ])->assertOk();
+
+        $this->assertSame('completed', $transaction->fresh()->status->value);
+        $this->assertSame(5000, $account->fresh()->balance_xof);
+    }
+
+    public function test_wave_webhook_fails_a_pending_cashin_without_crediting(): void
+    {
+        $this->waveProvider();
+        $account = $this->account('+221771111111', 0);
+        $transaction = $account->transactions()->create([
+            'type' => 'cashIn', 'status' => 'pending', 'amount_xof' => 5000,
+            'reference' => 'CASHIN-WAVETEST02',
+        ]);
+
+        $this->postSignedWaveWebhook([
+            'id' => 'EV_2', 'type' => 'checkout.session.payment_failed',
+            'data' => [
+                'id' => 'cos-2', 'client_reference' => 'CASHIN-WAVETEST02',
+                'last_payment_error' => ['code' => 'insufficient-funds', 'message' => 'Solde insuffisant'],
+            ],
+        ])->assertOk();
+
+        $this->assertSame('failed', $transaction->fresh()->status->value);
+        $this->assertSame('Solde insuffisant', $transaction->fresh()->failure_reason);
+        $this->assertSame(0, $account->fresh()->balance_xof);
+    }
+
+    public function test_wave_webhook_rejects_an_invalid_signature(): void
+    {
+        $this->waveProvider();
+        $account = $this->account('+221771111111', 0);
+        $transaction = $account->transactions()->create([
+            'type' => 'cashIn', 'status' => 'pending', 'amount_xof' => 5000,
+            'reference' => 'CASHIN-WAVETEST03',
+        ]);
+
+        $this->postJson('/api/webhooks/wave', [
+            'id' => 'EV_3', 'type' => 'checkout.session.completed',
+            'data' => ['client_reference' => 'CASHIN-WAVETEST03'],
+        ], ['Wave-Signature' => 't=1,v1=deadbeef'])->assertStatus(401);
+
+        $this->assertSame('pending', $transaction->fresh()->status->value);
+        $this->assertSame(0, $account->fresh()->balance_xof);
     }
 
     public function test_cashout_adds_the_admin_configured_fee_to_the_debited_amount(): void

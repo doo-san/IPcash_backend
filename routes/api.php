@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\ProviderController;
 use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\TransferController;
+use App\Http\Controllers\Api\WaveWebhookController;
 use Illuminate\Support\Facades\Route;
 
 // Chemins alignés sur api/openapi.yaml (source de vérité, voir CLAUDE.md
@@ -160,3 +161,9 @@ Route::middleware(['auth:sanctum', 'account.notBlocked'])->group(function () {
 // `auth:sanctum` ci-dessus.
 Route::post('webhooks/orange-money', [OrangeMoneyWebhookController::class, 'handle'])
     ->name('orange-money.webhook');
+
+// Idem pour Wave — sa signature (`Wave-Signature`) est vérifiée dans le
+// contrôleur lui-même plutôt que via un middleware, faute d'un moyen
+// standard de lire le corps brut avant que Laravel ne le parse ailleurs.
+Route::post('webhooks/wave', [WaveWebhookController::class, 'handle'])
+    ->name('wave.webhook');

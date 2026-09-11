@@ -16,11 +16,12 @@ use App\Models\FeeRule;
 use App\Models\MobileMoneyProvider;
 use App\Models\PromoCode;
 use App\Services\OrangeMoney\OrangeMoneyClient;
-use App\Services\OrangeMoney\OrangeMoneyException;
+use App\Services\Wave\WaveClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Throwable;
 
 // Implémente le tag `cashio` de openapi.yaml (dépôt/retrait mobile money).
 // Distinction importante (CLAUDE.md règle 9) : le dépôt/retrait *mobile
@@ -28,9 +29,10 @@ use Illuminate\Support\Str;
 // simuler une réussite réaliste ; le dépôt par carte/virement bancaire ne
 // le peut pas (aucun prestataire réel connecté) — voir `cashinCard`/
 // `cashinBank`, qui renvoient toujours `INTEGRATION_PENDING`.
-// Exception : Orange Money est réellement branché (`OrangeMoneyClient`,
-// voir `cashinViaOrangeMoney`) — pour ce prestataire précis, le dépôt suit
-// le cycle pending→completed/failed normal au lieu d'être simulé.
+// Exception : Orange Money et Wave sont réellement branchés
+// (`OrangeMoneyClient`, `WaveClient`, voir `cashinViaWebRedirect`) — pour
+// ces prestataires précis, le dépôt suit le cycle pending→completed/failed
+// normal au lieu d'être simulé.
 //
 // Frais (FeeRule, scopes cashIn/cashOut) : 0 par défaut tant qu'aucune
 // règle active n'existe pour le scope (voir FeeRule::computeFor) — même
@@ -75,14 +77,36 @@ class CashioController extends Controller
             return response()->json((new TransactionResource($existing))->resolve(), 202);
         }
 
-        // Orange Money est le seul opérateur mobile money réellement branché
-        // (OrangeMoneyClient, OM Pay) — les autres (Wave, Mixx by Yas...)
-        // restent sur la simulation interne ci-dessous tant qu'ils ne le
-        // sont pas aussi (CLAUDE.md règle 9 : purement interne au solde
+        // Orange Money et Wave sont les seuls opérateurs mobile money
+        // réellement branchés (OrangeMoneyClient/OM Pay, WaveClient) —
+        // Mixx by Yas reste sur la simulation interne ci-dessous tant qu'il
+        // ne l'est pas aussi (CLAUDE.md règle 9 : purement interne au solde
         // IPCash, peut simuler une réussite réaliste).
         $provider = MobileMoneyProvider::find($data['providerId']);
-        if ($provider?->isOrangeMoney() && $provider->isConfigured()) {
-            return $this->cashinViaOrangeMoney($account, $provider, $creditedXof, $feeXof, $promoCode, $idempotencyKey);
+        if ($provider?->isConfigured()) {
+            if ($provider->isOrangeMoney()) {
+                return $this->cashinViaWebRedirect(
+                    $account, $creditedXof, $feeXof, $promoCode, $idempotencyKey,
+                    fn (string $reference) => (new OrangeMoneyClient($provider))->preparePayment(
+                        amountXof: $creditedXof + $feeXof,
+                        reference: $reference,
+                        successUrl: route('orange-money.return', ['status' => 'success']),
+                        cancelUrl: route('orange-money.return', ['status' => 'cancel']),
+                        callbackUrl: route('orange-money.webhook'),
+                    ),
+                );
+            }
+            if ($provider->isWave()) {
+                return $this->cashinViaWebRedirect(
+                    $account, $creditedXof, $feeXof, $promoCode, $idempotencyKey,
+                    fn (string $reference) => (new WaveClient($provider))->createCheckoutSession(
+                        amountXof: $creditedXof + $feeXof,
+                        reference: $reference,
+                        successUrl: route('wave.return', ['status' => 'success']),
+                        errorUrl: route('wave.return', ['status' => 'error']),
+                    )['launchUrl'],
+                );
+            }
         }
 
         $transaction = DB::transaction(function () use ($account, $creditedXof, $feeXof, $promoCode, $idempotencyKey) {
@@ -102,17 +126,20 @@ class CashioController extends Controller
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }
 
-    // Dépôt Orange Money réel (OM Pay) : le solde n'est crédité qu'à la
-    // confirmation du webhook (`OrangeMoneyWebhookController`), jamais ici
-    // — contrairement au cash-in interne ci-dessus, cette opération dépend
-    // d'un vrai tiers (CLAUDE.md règle 3, trois états).
-    private function cashinViaOrangeMoney(
+    // Dépôt via un prestataire à redirection web réellement branché (OM
+    // Pay, Wave Checkout...) : le solde n'est crédité qu'à la confirmation
+    // du webhook correspondant, jamais ici — contrairement au cash-in
+    // interne ci-dessus, cette opération dépend d'un vrai tiers (CLAUDE.md
+    // règle 3, trois états). `$preparePayment` reçoit la référence de la
+    // transaction déjà créée et renvoie l'URL de paiement, ou lève
+    // n'importe quelle exception en cas d'échec côté prestataire.
+    private function cashinViaWebRedirect(
         Account $account,
-        MobileMoneyProvider $provider,
         int $creditedXof,
         int $feeXof,
         ?PromoCode $promoCode,
         ?string $idempotencyKey,
+        \Closure $preparePayment,
     ): JsonResponse {
         $transaction = $account->transactions()->create([
             'type' => TransactionType::CashIn,
@@ -124,14 +151,8 @@ class CashioController extends Controller
         ]);
 
         try {
-            $paymentUrl = (new OrangeMoneyClient($provider))->preparePayment(
-                amountXof: $creditedXof + $feeXof,
-                reference: $transaction->reference,
-                successUrl: route('orange-money.return', ['status' => 'success']),
-                cancelUrl: route('orange-money.return', ['status' => 'cancel']),
-                callbackUrl: route('orange-money.webhook'),
-            );
-        } catch (OrangeMoneyException $e) {
+            $paymentUrl = $preparePayment($transaction->reference);
+        } catch (Throwable $e) {
             $transaction->update(['status' => 'failed', 'failure_reason' => $e->getMessage()]);
 
             return response()->json((new TransactionResource($transaction->fresh()))->resolve(), 202);

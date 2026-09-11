@@ -15,3 +15,9 @@ Route::get('/', function () {
 Route::get('/orange-money/return', function (Request $request) {
     return view('orange-money.return', ['status' => $request->query('status', 'success')]);
 })->name('orange-money.return');
+
+// Même page (générique, pas de mention d'Orange dedans) réutilisée pour
+// Wave — pas besoin d'une deuxième vue pour un texte identique.
+Route::get('/wave/return', function (Request $request) {
+    return view('orange-money.return', ['status' => $request->query('status', 'success')]);
+})->name('wave.return');

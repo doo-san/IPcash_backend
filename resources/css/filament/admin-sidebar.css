@@ -1,0 +1,89 @@
+/*
+ * Barre latérale aux couleurs IPCash : fond blanc, avec le vert de marque
+ * (`Color::hex('#00A05B')`, identique à `->colors(['primary' => …])` dans
+ * AdminPanelProvider) utilisé uniquement en touches à opacité variable —
+ * séparateur, libellés de groupe, icônes, survol et page active — plutôt
+ * qu'en aplat plein comme dans une version précédente. Comme le fond est
+ * redevenu blanc, le texte repasse en gris foncé neutre au repos (le blanc
+ * plein utilisé sur fond vert plein serait invisible ici) ; l'état actif
+ * reste en vert plein pour rester bien identifiable.
+ *
+ * La bordure de séparation reste posée sur `.fi-sidebar-nav` (zone de
+ * navigation, sous le logo) et non sur `.fi-sidebar` entier, pour ne pas
+ * remonter jusqu'à hauteur du logo dans `.fi-sidebar-header`.
+ *
+ * Enregistré comme simple asset CSS (FilamentAsset::register en boot() de
+ * AdminPanelProvider) et non comme "thème" Filament complet : Filament v3
+ * exige Tailwind CSS v3 pour un thème compilé, alors que ce projet est déjà
+ * en Tailwind v4 (resources/css/app.css) — pas question de faire cohabiter
+ * les deux pipelines pour quelques règles. D'où du CSS simple, sans
+ * `@apply`, ciblant les classes de composants stables de Filament
+ * (`.fi-sidebar-*`) plutôt que ses classes utilitaires Tailwind.
+ */
+
+/* Fond blanc — sidebar fixe desktop et tiroir mobile, clair et sombre. */
+.fi-sidebar {
+    background-color: #ffffff !important;
+}
+
+/* En-tête (logo) : transparent pour hériter du même blanc, sans le liseré
+   gris (`ring-1 ring-gray-950/5 ... lg:shadow-sm`) posé par défaut. */
+.fi-sidebar-header {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+}
+
+/* Logo : sur fond blanc, la variante colorée normale (celle du mode clair)
+   redevient lisible — on force donc son affichage en permanence dans la
+   sidebar, qu'importe le thème clair/sombre choisi par l'utilisateur.
+   L'écran de connexion garde son comportement normal. */
+.fi-sidebar .fi-logo.dark\:flex {
+    display: none !important;
+}
+
+.fi-sidebar .fi-logo.dark\:hidden {
+    display: flex !important;
+}
+
+/* Séparation avec la zone de contenu, sous le logo uniquement — vert à
+   faible opacité plutôt qu'un gris neutre. */
+.fi-sidebar-nav {
+    border-inline-end: 1px solid rgb(0 160 91 / 0.15);
+}
+
+/* Libellés de groupe ("Clients", "Argent"…) et leur icône/chevron : vert à
+   opacité variable, sur fond blanc. */
+.fi-sidebar-group-label {
+    color: rgb(0 160 91 / 0.75) !important;
+}
+
+.fi-sidebar-group-icon {
+    color: rgb(0 160 91 / 0.55) !important;
+}
+
+.fi-sidebar-group-collapse-button .fi-icon-btn-icon {
+    color: rgb(0 160 91 / 0.55) !important;
+}
+
+/* Liens de navigation : gris foncé neutre au repos (lisible sur blanc),
+   vert plein sur l'état actif — avec un fond vert à faible opacité pour le
+   survol et un fond un peu plus soutenu pour la page active. */
+.fi-sidebar-item-icon,
+.fi-sidebar-item-label {
+    color: #334155 !important; /* slate-700 */
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon,
+.fi-sidebar-item.fi-active .fi-sidebar-item-label {
+    color: #00a05b !important;
+}
+
+.fi-sidebar-item-button:hover,
+.fi-sidebar-item-button:focus-visible {
+    background-color: rgb(0 160 91 / 0.06) !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-button {
+    background-color: rgb(0 160 91 / 0.12) !important;
+}

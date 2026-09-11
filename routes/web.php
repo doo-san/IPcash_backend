@@ -1,0 +1,17 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return view('welcome');
+});
+
+// Page affichée après un paiement OM Pay (succès ou annulation) — l'app
+// intercepte la navigation de la WebView vers cette URL pour fermer
+// l'écran et revenir au flux normal (voir OrangeMoneyPaymentWebViewScreen
+// côté Flutter) ; ce rendu HTML n'est vu que si l'utilisateur ferme
+// manuellement l'onglet au lieu de laisser l'app faire.
+Route::get('/orange-money/return', function (Request $request) {
+    return view('orange-money.return', ['status' => $request->query('status', 'success')]);
+})->name('orange-money.return');

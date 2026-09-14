@@ -1,7 +1,7 @@
 <x-site-layout :title="'Accueil'">
 
     <section class="hero" style="position:relative;overflow:hidden;padding:110px 0 40px;">
-        <div style="content:'';position:absolute;inset:-20% -10% auto -10%;height:640px;background:radial-gradient(circle at 20% 20%, rgba(62,220,180,0.22), transparent 55%), radial-gradient(circle at 80% 0%, rgba(58,76,242,0.16), transparent 50%);z-index:-1;pointer-events:none;"></div>
+        <div style="content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%, rgba(62,220,180,0.22), transparent 55%), radial-gradient(circle at 80% 0%, rgba(58,76,242,0.16), transparent 50%);z-index:-1;pointer-events:none;"></div>
         <div class="wrap">
             <div style="display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:center;" class="hero-grid">
                 <div class="reveal">

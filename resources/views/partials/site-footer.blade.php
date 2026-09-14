@@ -18,7 +18,7 @@
                 <ul>
                     <li><a href="{{ route('site.about') }}">À propos</a></li>
                     <li><a href="{{ route('site.contact') }}">Contact</a></li>
-                    <li><a href="/admin">Espace administrateur</a></li>
+                    <li><a href="/admin">Se connecter</a></li>
                 </ul>
             </div>
             <div class="footer-col">

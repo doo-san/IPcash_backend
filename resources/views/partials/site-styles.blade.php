@@ -60,11 +60,11 @@
     nav.main a:hover, nav.main a.active { color: var(--ink); }
     nav.main a.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -27px; height: 2px; background: var(--ink); }
     .header-actions { display: flex; align-items: center; gap: 20px; }
-    .header-actions .admin-link { font-size: 14px; font-weight: 600; color: var(--slate); text-decoration: none; }
+    .header-actions .login-link { font-size: 14px; font-weight: 600; color: var(--slate); text-decoration: none; }
     .nav-toggle { display: none; background: none; border: none; padding: 8px; cursor: pointer; }
     .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--ink); margin: 5px 0; border-radius: 2px; }
     @media (max-width: 860px) {
-        nav.main, .admin-link { display: none; }
+        nav.main, .login-link { display: none; }
         .nav-toggle { display: block; }
         .mobile-nav { display: flex; }
     }

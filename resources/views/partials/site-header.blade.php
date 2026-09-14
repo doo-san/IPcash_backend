@@ -12,7 +12,7 @@
             <a href="{{ route('site.contact') }}" class="{{ request()->routeIs('site.contact') ? 'active' : '' }}">Contact</a>
         </nav>
         <div class="header-actions">
-            <a href="/admin" class="admin-link">Espace administrateur</a>
+            <a href="/admin" class="login-link">Se connecter</a>
             <a href="{{ route('site.home') }}#telecharger" class="btn btn-primary btn-sm">Télécharger</a>
         </div>
         <button class="nav-toggle" type="button" aria-label="Ouvrir le menu" onclick="document.getElementById('mobileNav').classList.toggle('open')">
@@ -25,6 +25,6 @@
         <a href="{{ route('site.security') }}">Sécurité</a>
         <a href="{{ route('site.about') }}">À propos</a>
         <a href="{{ route('site.contact') }}">Contact</a>
-        <a href="/admin">Espace administrateur</a>
+        <a href="/admin">Se connecter</a>
     </div>
 </header>

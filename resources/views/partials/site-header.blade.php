@@ -1,7 +1,7 @@
 <header class="site">
     <div class="wrap">
         <a href="{{ route('site.home') }}" class="logo">
-            <span class="logo-mark"></span>
+            <img src="{{ asset('images/ipcash-icon.svg') }}" alt="" class="logo-mark">
             IPCash
         </a>
         <nav class="main">

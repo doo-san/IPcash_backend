@@ -2,7 +2,7 @@
     <div class="wrap">
         <div class="footer-grid">
             <div class="footer-brand">
-                <a href="{{ route('site.home') }}" class="logo"><span class="logo-mark"></span>IPCash</a>
+                <a href="{{ route('site.home') }}" class="logo"><img src="{{ asset('images/ipcash-icon.svg') }}" alt="" class="logo-mark">IPCash</a>
                 <p>La super-app financière pensée pour le Sénégal et l'UEMOA.</p>
             </div>
             <div class="footer-col">

@@ -67,7 +67,6 @@
     <section id="fonctionnalites">
         <div class="wrap">
             <div class="section-head center reveal">
-                <span class="kicker" style="justify-content:center;">Fonctionnalités</span>
                 <h2>Tout ce dont vous avez besoin, au quotidien</h2>
                 <p>Une seule app pour gérer votre argent, sans jongler entre plusieurs opérateurs.</p>
             </div>
@@ -94,7 +93,6 @@
     <section class="alt">
         <div class="wrap">
             <div class="section-head center reveal">
-                <span class="kicker" style="justify-content:center;">Comment ça marche</span>
                 <h2>Trois étapes, et c'est fait</h2>
                 <p>Pas de dossier, pas de rendez-vous en agence.</p>
             </div>
@@ -121,7 +119,6 @@
     <section class="dark">
         <div class="wrap">
             <div class="section-head center reveal">
-                <span class="kicker" style="justify-content:center;">Confiance</span>
                 <h2>Votre sécurité, notre priorité</h2>
                 <p>Votre argent et vos données sont protégés à chaque étape.</p>
             </div>
@@ -140,7 +137,6 @@
     <section id="faq">
         <div class="wrap">
             <div class="section-head center reveal">
-                <span class="kicker" style="justify-content:center;">Questions fréquentes</span>
                 <h2>Tout ce qu'il faut savoir</h2>
             </div>
             <div class="wrap-narrow reveal" style="padding:0;">

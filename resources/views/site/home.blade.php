@@ -14,27 +14,7 @@
                 </div>
                 <div class="reveal-scale" style="display:flex;justify-content:center;position:relative;">
                     <div style="width:280px;border-radius:42px;background:var(--ink);padding:12px;box-shadow:0 40px 80px -30px rgba(14,26,22,0.45),0 10px 24px -12px rgba(14,26,22,0.25);transform:rotate(2deg);">
-                        <div style="background:#fff;border-radius:32px;overflow:hidden;">
-                            <div style="height:26px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;"><span style="width:70px;height:5px;border-radius:999px;background:rgba(0,0,0,0.15);"></span></div>
-                            <div style="margin:6px 14px 14px;padding:20px;border-radius:20px;color:#fff;background:linear-gradient(135deg,var(--hero-start),var(--hero-end));">
-                                <small style="opacity:.8;font-size:12px;font-weight:600;">SOLDE DISPONIBLE</small>
-                                <div style="font-size:26px;font-weight:800;margin-top:6px;letter-spacing:-0.02em;">248 500 F</div>
-                            </div>
-                            <div style="display:flex;gap:10px;padding:0 14px 16px;">
-                                <span style="flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--ink);background:var(--mist);border-radius:12px;padding:10px 4px;">Envoyer</span>
-                                <span style="flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--ink);background:var(--mist);border-radius:12px;padding:10px 4px;">Déposer</span>
-                                <span style="flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--ink);background:var(--mist);border-radius:12px;padding:10px 4px;">Payer</span>
-                            </div>
-                            <div style="padding:0 14px 20px;display:flex;flex-direction:column;gap:10px;">
-                                @foreach ([['-15 000'], ['+50 000'], ['-8 200']] as $row)
-                                <div style="display:flex;align-items:center;gap:10px;">
-                                    <div style="width:32px;height:32px;border-radius:10px;background:var(--mist);flex-shrink:0;"></div>
-                                    <div style="flex:1;"><div style="height:8px;width:70%;border-radius:4px;background:#DCE4E0;margin-bottom:6px;"></div><div style="height:6px;width:45%;border-radius:4px;background:#EAEFED;"></div></div>
-                                    <div style="font-size:12px;font-weight:700;">{{ $row[0] }}</div>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
+                        <img src="{{ asset('images/screenshots/dashboard.png') }}" alt="Tableau de bord IPCash" style="display:block;width:100%;border-radius:32px;">
                     </div>
                 </div>
             </div>

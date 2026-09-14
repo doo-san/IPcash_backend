@@ -37,22 +37,38 @@
                 <h2>Tout ce dont vous avez besoin, au quotidien</h2>
                 <p>Une seule app pour gérer votre argent, sans jongler entre plusieurs opérateurs.</p>
             </div>
+            @php
+                $icons = [
+                    'swap' => '<path d="M7 7h11l-3-3M18 7l-3 3"/><path d="M17 17H6l3 3M6 17l3-3"/>',
+                    'phone' => '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+                    'exchange' => '<path d="M4 12a8 8 0 0 1 14-5l2 2"/><path d="M20 5v4h-4"/><path d="M20 12a8 8 0 0 1-14 5l-2-2"/><path d="M4 19v-4h4"/>',
+                    'card' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/>',
+                    'wallet' => '<path d="M3 8a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z"/><path d="M16 13h2"/><path d="M3 8V6a2 2 0 0 1 2-2h9"/>',
+                    'qr' => '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3m4 0h.01M14 18h7m-7 3h3m4-3v3"/>',
+                    'signal' => '<path d="M4 18h.01M9 18v-4M14 18v-8M19 18V6"/>',
+                    'shield' => '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/>',
+                ];
+                $iconSvg = fn (string $key) => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'.$icons[$key].'</svg>';
+            @endphp
             <div class="bento">
                 <div class="card span-2 row-2 reveal">
-                    <div class="icon">💸</div>
+                    <div class="icon" style="background:var(--green);">{!! $iconSvg('swap') !!}</div>
                     <h3>Transfert instantané</h3>
                     <p>Envoyez de l'argent à un proche en quelques secondes, sans frais cachés — vers un contact IPCash ou par numéro de téléphone.</p>
                 </div>
-                <div class="card reveal"><div class="icon">📲</div><h3>Mobile money</h3><p>Déposez et retirez depuis Orange Money ou Wave.</p></div>
-                <div class="card reveal"><div class="icon">💱</div><h3>IPchange</h3><p>Détenez et échangez plusieurs devises au meilleur taux.</p></div>
-                <div class="card reveal"><div class="icon">💳</div><h3>Carte virtuelle</h3><p>Une carte prépayée pour payer en ligne en sécurité.</p></div>
-                <div class="card reveal"><div class="icon">🏺</div><h3>Poches d'épargne</h3><p>Mettez de côté pour vos projets, à votre rythme.</p></div>
-                <div class="card span-2 reveal"><div class="icon">🧾</div><h3>Factures &amp; QR</h3><p>Payez eau, électricité, Canal+ et vos achats du quotidien en scannant un simple code QR.</p></div>
-                <div class="card reveal"><div class="icon">📶</div><h3>Crédit &amp; eSIM</h3><p>Rechargez votre forfait ou activez un eSIM voyage.</p></div>
-                <div class="card reveal"><div class="icon">🛡️</div><h3>Assurance</h3><p>Souscrivez une assurance auto depuis votre compte.</p></div>
+                <div class="card reveal"><div class="icon" style="background:var(--hero-end);">{!! $iconSvg('phone') !!}</div><h3>Mobile money</h3><p>Déposez et retirez depuis Orange Money ou Wave.</p></div>
+                <div class="card reveal"><div class="icon" style="background:var(--sun);">{!! $iconSvg('exchange') !!}</div><h3>IPchange</h3><p>Détenez et échangez plusieurs devises au meilleur taux.</p></div>
+                <div class="card reveal"><div class="icon" style="background:var(--pink);">{!! $iconSvg('card') !!}</div><h3>Carte virtuelle</h3><p>Une carte prépayée pour payer en ligne en sécurité.</p></div>
+                <div class="card reveal"><div class="icon" style="background:var(--green);">{!! $iconSvg('wallet') !!}</div><h3>Poches d'épargne</h3><p>Mettez de côté pour vos projets, à votre rythme.</p></div>
+                <div class="card span-2 reveal"><div class="icon" style="background:var(--hero-end);">{!! $iconSvg('qr') !!}</div><h3>Factures &amp; QR</h3><p>Payez eau, électricité, Canal+ et vos achats du quotidien en scannant un simple code QR.</p></div>
+                <div class="card reveal"><div class="icon" style="background:var(--sun);">{!! $iconSvg('signal') !!}</div><h3>Crédit &amp; eSIM</h3><p>Rechargez votre forfait ou activez un eSIM voyage.</p></div>
+                <div class="card reveal"><div class="icon" style="background:var(--pink);">{!! $iconSvg('shield') !!}</div><h3>Assurance</h3><p>Souscrivez une assurance auto depuis votre compte.</p></div>
             </div>
-            <p class="reveal" style="text-align:center;margin-top:40px;">
-                <a href="{{ route('site.features') }}" class="btn btn-ghost">Voir toutes les fonctionnalités en détail →</a>
+            <p class="reveal" style="text-align:center;margin-top:44px;">
+                <a href="{{ route('site.features') }}" class="btn btn-primary">
+                    Voir toutes les fonctionnalités
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </a>
             </p>
         </div>
     </section>

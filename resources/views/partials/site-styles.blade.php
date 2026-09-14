@@ -139,7 +139,7 @@
         transition: border-color .2s, transform .2s, box-shadow .2s;
     }
     .card:hover { border-color: #C9D6D0; transform: translateY(-3px); box-shadow: 0 16px 32px -18px rgba(14,26,22,0.25); }
-    .card .icon { width: 42px; height: 42px; border-radius: 11px; background: var(--mist); display: flex; align-items: center; justify-content: center; margin-bottom: auto; font-size: 20px; flex-shrink: 0; }
+    .card .icon { width: 46px; height: 46px; border-radius: 50%; background: var(--mist); display: flex; align-items: center; justify-content: center; margin-bottom: auto; font-size: 20px; flex-shrink: 0; box-shadow: 0 6px 14px -6px rgba(14,26,22,0.3); }
     .card h3 { font-family: var(--sans); font-size: 16.5px; font-weight: 700; margin: 16px 0 6px; }
     .card p { font-size: 13.5px; color: var(--slate); margin: 0; }
 

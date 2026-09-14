@@ -3,9 +3,11 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Pas de vitrine publique — seul l'admin (/admin, Filament) sert à
+// quelque chose ici. Évite aussi de dépendre d'un build Node/Vite en
+// production pour une page qui n'était jamais utilisée (voir welcome.blade.php,
+// supprimée).
+Route::get('/', fn () => redirect('/admin'));
 
 // Page affichée après un paiement OM Pay (succès ou annulation) — l'app
 // intercepte la navigation de la WebView vers cette URL pour fermer

@@ -285,8 +285,8 @@
         -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 8px, transparent 8px 16px);
         mask-image: repeating-linear-gradient(90deg, #000 0 8px, transparent 8px 16px);
     }
-    .steps::before { left: calc(16.66% + 27px); right: 50%; background: linear-gradient(90deg, var(--hero-start), var(--hero-end)); }
-    .steps::after { left: 50%; right: calc(16.66% + 27px); background: linear-gradient(90deg, var(--hero-end), var(--sun)); }
+    .steps::before { left: calc(16.66% + 28px); right: calc(50% + 28px); background: linear-gradient(90deg, var(--hero-start), var(--hero-end)); }
+    .steps::after { left: calc(50% + 28px); right: calc(16.66% + 28px); background: linear-gradient(90deg, var(--hero-end), var(--sun)); }
     @media (max-width: 780px) { .steps::before, .steps::after { display: none; } }
     .step { position: relative; text-align: center; }
     .step .num {

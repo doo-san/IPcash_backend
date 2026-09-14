@@ -1,12 +1,21 @@
 <?php
 
+use App\Http\Controllers\ContactController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Page de présentation publique d'IPCash — CSS entièrement inline (pas de
-// classes Tailwind), volontairement : évite de dépendre d'un build
-// Node/Vite en production pour cette seule page.
-Route::view('/', 'landing')->name('landing');
+// Site public de présentation d'IPCash — CSS entièrement inline (pas de
+// classes Tailwind/build Vite), volontairement : évite de dépendre d'un
+// build Node en production pour ces pages. Voir
+// resources/views/components/site-layout.blade.php pour le gabarit commun.
+Route::view('/', 'site.home')->name('site.home');
+Route::view('/fonctionnalites', 'site.features')->name('site.features');
+Route::view('/securite', 'site.security')->name('site.security');
+Route::view('/a-propos', 'site.about')->name('site.about');
+Route::get('/contact', fn () => view('site.contact'))->name('site.contact');
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('site.contact.store');
 
 // Page affichée après un paiement OM Pay (succès ou annulation) — l'app
 // intercepte la navigation de la WebView vers cette URL pour fermer

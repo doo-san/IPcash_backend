@@ -5,24 +5,17 @@
         <div class="wrap">
             <div style="display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:center;" class="hero-grid">
                 <div class="reveal">
-                    <span class="pill"><span class="dot"></span> Pensé pour le Sénégal et l'UEMOA</span>
-                    <h1 style="font-size:58px;line-height:1.08;margin:22px 0 22px;">Votre argent,<br><span style="background:linear-gradient(90deg,var(--hero-start),var(--hero-end));-webkit-background-clip:text;background-clip:text;color:transparent;">enfin simple.</span></h1>
+                    <h1 style="font-size:58px;line-height:1.08;margin:0 0 22px;">Votre argent,<br><span style="background:linear-gradient(90deg,var(--hero-start),var(--hero-end));-webkit-background-clip:text;background-clip:text;color:transparent;">enfin simple.</span></h1>
                     <p style="font-size:19px;color:var(--slate);max-width:480px;margin:0 0 36px;font-family:var(--sans);">
                         Transférez, épargnez, payez vos factures et changez de devise —
                         tout depuis une seule application, sans passer par une agence.
                     </p>
-                    <div class="cta-row" style="margin-bottom:14px;">
+                    <div class="cta-row">
                         <a href="#telecharger" class="btn btn-primary">Télécharger sur l'App Store</a>
                         <a href="#telecharger" class="btn btn-ghost">Disponible sur Google Play</a>
                     </div>
-                    <p style="font-size:13px;color:var(--slate);display:flex;align-items:center;gap:8px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="#00A05B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="#00A05B" stroke-width="1.6"/></svg>
-                        Bientôt disponible
-                    </p>
                 </div>
                 <div class="reveal-scale" style="display:flex;justify-content:center;position:relative;">
-                    <div style="position:absolute;top:8%;left:-6%;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 16px 32px -12px rgba(14,26,22,0.22);border:1px solid var(--line);font-size:13px;font-weight:700;" class="float-card">🔒&nbsp; Compte vérifié</div>
-                    <div style="position:absolute;bottom:10%;right:-8%;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 16px 32px -12px rgba(14,26,22,0.22);border:1px solid var(--line);font-size:13px;font-weight:700;" class="float-card">⚡&nbsp; Transfert instantané</div>
                     <div style="width:280px;border-radius:42px;background:var(--ink);padding:12px;box-shadow:0 40px 80px -30px rgba(14,26,22,0.45),0 10px 24px -12px rgba(14,26,22,0.25);transform:rotate(2deg);">
                         <div style="background:#fff;border-radius:32px;overflow:hidden;">
                             <div style="height:26px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;"><span style="width:70px;height:5px;border-radius:999px;background:rgba(0,0,0,0.15);"></span></div>
@@ -50,7 +43,7 @@
             </div>
         </div>
     </section>
-    <style>@media (max-width: 920px) { .hero-grid { grid-template-columns: 1fr !important; } .float-card { display: none; } }
+    <style>@media (max-width: 920px) { .hero-grid { grid-template-columns: 1fr !important; } }
     @media (max-width: 640px) { .hero h1 { font-size: 36px !important; } }</style>
 
     <div class="wrap">

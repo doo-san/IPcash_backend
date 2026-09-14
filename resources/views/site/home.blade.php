@@ -93,7 +93,7 @@
         </div>
     </section>
 
-    <section class="dark">
+    <section class="dark" style="background-image:linear-gradient(rgba(5,10,25,.3),rgba(5,10,25,.3)),url('{{ asset('images/backgrounds/security-section.jpeg') }}');background-size:cover;background-position:center;">
         <div class="wrap">
             <div class="section-head center reveal">
                 <h2>Votre sécurité, notre priorité</h2>

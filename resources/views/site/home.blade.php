@@ -1,73 +1,75 @@
 <x-site-layout :title="'Accueil'">
 
-    <section class="hero-centered">
-        <div class="wrap reveal">
-            <span class="pill"><span class="dot"></span> Pensé pour le Sénégal et l'UEMOA</span>
-            <h1>Votre argent,<br><span style="background:linear-gradient(90deg,var(--hero-start),var(--hero-end));-webkit-background-clip:text;background-clip:text;color:transparent;">enfin simple.</span></h1>
-            <p class="lede">
-                Transférez, épargnez, payez vos factures et changez de devise —
-                tout depuis une seule application, sans passer par une agence.
-            </p>
-            <div class="cta-row">
-                <a href="#telecharger" class="btn btn-primary">Télécharger sur l'App Store</a>
-                <a href="#telecharger" class="btn btn-ghost">Disponible sur Google Play</a>
-            </div>
-            <p class="cta-note">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="#00A05B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="#00A05B" stroke-width="1.6"/></svg>
-                Bientôt disponible
-            </p>
-        </div>
-    </section>
-
-    <section class="tight" style="background:var(--mist);padding-top:0;">
-        <div class="preview-stage reveal-scale">
-            <div class="preview-glow"></div>
-            <div class="preview-toast t1">🔒&nbsp; Compte vérifié</div>
-            <div class="preview-toast t2">⚡&nbsp; Transfert instantané</div>
-            <div class="preview-toast t3">💱&nbsp; 3 devises</div>
-            <div class="preview-phone">
-                <div class="screen">
-                    <div style="height:30px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;"><span style="width:76px;height:5px;border-radius:999px;background:rgba(0,0,0,0.15);"></span></div>
-                    <div style="margin:8px 16px 16px;padding:22px;border-radius:22px;color:#fff;background:linear-gradient(135deg,var(--hero-start),var(--hero-end));">
-                        <small style="opacity:.8;font-size:12.5px;font-weight:600;">SOLDE DISPONIBLE</small>
-                        <div style="font-size:30px;font-weight:800;margin-top:6px;letter-spacing:-0.02em;">248 500 F</div>
+    <section class="hero" style="position:relative;overflow:hidden;padding:110px 0 40px;">
+        <div style="content:'';position:absolute;inset:-20% -10% auto -10%;height:640px;background:radial-gradient(circle at 20% 20%, rgba(62,220,180,0.22), transparent 55%), radial-gradient(circle at 80% 0%, rgba(58,76,242,0.16), transparent 50%);z-index:-1;pointer-events:none;"></div>
+        <div class="wrap">
+            <div style="display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:center;" class="hero-grid">
+                <div class="reveal">
+                    <span class="pill"><span class="dot"></span> Pensé pour le Sénégal et l'UEMOA</span>
+                    <h1 style="font-size:58px;line-height:1.08;margin:22px 0 22px;">Votre argent,<br><span style="background:linear-gradient(90deg,var(--hero-start),var(--hero-end));-webkit-background-clip:text;background-clip:text;color:transparent;">enfin simple.</span></h1>
+                    <p style="font-size:19px;color:var(--slate);max-width:480px;margin:0 0 36px;font-family:var(--sans);">
+                        Transférez, épargnez, payez vos factures et changez de devise —
+                        tout depuis une seule application, sans passer par une agence.
+                    </p>
+                    <div class="cta-row" style="margin-bottom:14px;">
+                        <a href="#telecharger" class="btn btn-primary">Télécharger sur l'App Store</a>
+                        <a href="#telecharger" class="btn btn-ghost">Disponible sur Google Play</a>
                     </div>
-                    <div style="display:flex;gap:10px;padding:0 16px 18px;">
-                        <span style="flex:1;text-align:center;font-size:11.5px;font-weight:700;color:var(--ink);background:var(--mist);border-radius:13px;padding:11px 4px;">Envoyer</span>
-                        <span style="flex:1;text-align:center;font-size:11.5px;font-weight:700;color:var(--ink);background:var(--mist);border-radius:13px;padding:11px 4px;">Déposer</span>
-                        <span style="flex:1;text-align:center;font-size:11.5px;font-weight:700;color:var(--ink);background:var(--mist);border-radius:13px;padding:11px 4px;">Payer</span>
-                    </div>
-                    <div style="padding:0 16px 24px;display:flex;flex-direction:column;gap:11px;">
-                        @foreach ([['Transfert · Awa D.', '-15 000'], ['Dépôt Orange Money', '+50 000'], ['Facture SENELEC', '-8 200']] as $row)
-                        <div style="display:flex;align-items:center;gap:11px;">
-                            <div style="width:34px;height:34px;border-radius:11px;background:var(--mist);flex-shrink:0;"></div>
-                            <div style="flex:1;"><div style="height:8px;width:78%;border-radius:4px;background:#DCE4E0;margin-bottom:6px;"></div><div style="height:6px;width:50%;border-radius:4px;background:#EAEFED;"></div></div>
-                            <div style="font-size:12.5px;font-weight:700;">{{ $row[1] }}</div>
+                    <p style="font-size:13px;color:var(--slate);display:flex;align-items:center;gap:8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="#00A05B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="10" stroke="#00A05B" stroke-width="1.6"/></svg>
+                        Bientôt disponible
+                    </p>
+                </div>
+                <div class="reveal-scale" style="display:flex;justify-content:center;position:relative;">
+                    <div style="position:absolute;top:8%;left:-6%;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 16px 32px -12px rgba(14,26,22,0.22);border:1px solid var(--line);font-size:13px;font-weight:700;" class="float-card">🔒&nbsp; Compte vérifié</div>
+                    <div style="position:absolute;bottom:10%;right:-8%;background:#fff;border-radius:16px;padding:12px 16px;box-shadow:0 16px 32px -12px rgba(14,26,22,0.22);border:1px solid var(--line);font-size:13px;font-weight:700;" class="float-card">⚡&nbsp; Transfert instantané</div>
+                    <div style="width:280px;border-radius:42px;background:var(--ink);padding:12px;box-shadow:0 40px 80px -30px rgba(14,26,22,0.45),0 10px 24px -12px rgba(14,26,22,0.25);transform:rotate(2deg);">
+                        <div style="background:#fff;border-radius:32px;overflow:hidden;">
+                            <div style="height:26px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;"><span style="width:70px;height:5px;border-radius:999px;background:rgba(0,0,0,0.15);"></span></div>
+                            <div style="margin:6px 14px 14px;padding:20px;border-radius:20px;color:#fff;background:linear-gradient(135deg,var(--hero-start),var(--hero-end));">
+                                <small style="opacity:.8;font-size:12px;font-weight:600;">SOLDE DISPONIBLE</small>
+                                <div style="font-size:26px;font-weight:800;margin-top:6px;letter-spacing:-0.02em;">248 500 F</div>
+                            </div>
+                            <div style="display:flex;gap:10px;padding:0 14px 16px;">
+                                <span style="flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--ink);background:var(--mist);border-radius:12px;padding:10px 4px;">Envoyer</span>
+                                <span style="flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--ink);background:var(--mist);border-radius:12px;padding:10px 4px;">Déposer</span>
+                                <span style="flex:1;text-align:center;font-size:11px;font-weight:700;color:var(--ink);background:var(--mist);border-radius:12px;padding:10px 4px;">Payer</span>
+                            </div>
+                            <div style="padding:0 14px 20px;display:flex;flex-direction:column;gap:10px;">
+                                @foreach ([['-15 000'], ['+50 000'], ['-8 200']] as $row)
+                                <div style="display:flex;align-items:center;gap:10px;">
+                                    <div style="width:32px;height:32px;border-radius:10px;background:var(--mist);flex-shrink:0;"></div>
+                                    <div style="flex:1;"><div style="height:8px;width:70%;border-radius:4px;background:#DCE4E0;margin-bottom:6px;"></div><div style="height:6px;width:45%;border-radius:4px;background:#EAEFED;"></div></div>
+                                    <div style="font-size:12px;font-weight:700;">{{ $row[0] }}</div>
+                                </div>
+                                @endforeach
+                            </div>
                         </div>
-                        @endforeach
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="wrap">
-            <div class="stat-strip reveal" style="border-radius:var(--radius-md);border:1px solid var(--line);background:#fff;margin-top:56px;">
-                <div><div class="num">8</div><div class="lbl">Services financiers</div></div>
-                <div><div class="num">2</div><div class="lbl">Opérateurs mobile money</div></div>
-                <div><div class="num">100%</div><div class="lbl">Chiffré de bout en bout</div></div>
-                <div><div class="num">24/7</div><div class="lbl">Accessible depuis l'app</div></div>
-            </div>
-        </div>
-
-        <div class="wrap reveal partner-strip" style="padding-top:56px;">
-            <p style="text-align:center;font-size:13px;font-weight:700;color:var(--slate-light);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 24px;">Compatible avec vos opérateurs mobile money</p>
-            <div style="display:flex;align-items:center;justify-content:center;gap:56px;flex-wrap:wrap;opacity:0.85;">
-                <img src="{{ asset('images/partners/orange_money.svg') }}" alt="Orange Money" style="height:34px;width:auto;">
-                <img src="{{ asset('images/partners/wave.svg') }}" alt="Wave" style="height:30px;width:auto;">
-                <img src="{{ asset('images/partners/mixx_by_yas.svg') }}" alt="Mixx by Yas" style="height:30px;width:auto;">
-            </div>
-        </div>
     </section>
+    <style>@media (max-width: 920px) { .hero-grid { grid-template-columns: 1fr !important; } .float-card { display: none; } }
+    @media (max-width: 640px) { .hero h1 { font-size: 36px !important; } }</style>
+
+    <div class="wrap">
+        <div class="stat-strip reveal" style="border-radius:var(--radius-md);border:1px solid var(--line);margin-top:8px;">
+            <div><div class="num">8</div><div class="lbl">Services financiers</div></div>
+            <div><div class="num">2</div><div class="lbl">Opérateurs mobile money</div></div>
+            <div><div class="num">100%</div><div class="lbl">Chiffré de bout en bout</div></div>
+            <div><div class="num">24/7</div><div class="lbl">Accessible depuis l'app</div></div>
+        </div>
+    </div>
+
+    <div class="wrap reveal partner-strip" style="padding-top:56px;padding-bottom:8px;">
+        <p style="text-align:center;font-size:13px;font-weight:700;color:var(--slate-light);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 24px;">Compatible avec vos opérateurs mobile money</p>
+        <div style="display:flex;align-items:center;justify-content:center;gap:56px;flex-wrap:wrap;opacity:0.85;">
+            <img src="{{ asset('images/partners/orange_money.svg') }}" alt="Orange Money" style="height:34px;width:auto;">
+            <img src="{{ asset('images/partners/wave.svg') }}" alt="Wave" style="height:30px;width:auto;">
+            <img src="{{ asset('images/partners/mixx_by_yas.svg') }}" alt="Mixx by Yas" style="height:30px;width:auto;">
+        </div>
+    </div>
 
     <section id="fonctionnalites">
         <div class="wrap">

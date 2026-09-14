@@ -23,11 +23,11 @@
     <style>@media (max-width: 920px) { .hero-grid { grid-template-columns: 1fr !important; } }
     @media (max-width: 640px) { .hero h1 { font-size: 36px !important; } }</style>
 
-    <div class="wrap reveal partner-strip" style="padding-top:8px;padding-bottom:8px;">
+    <div class="wrap reveal partner-strip" style="padding-top:40px;padding-bottom:8px;">
         <div style="display:flex;align-items:center;justify-content:center;gap:56px;flex-wrap:wrap;opacity:0.85;">
-            <img src="{{ asset('images/partners/orange_money.svg') }}" alt="Orange Money" style="height:34px;width:auto;">
-            <img src="{{ asset('images/partners/wave.svg') }}" alt="Wave" style="height:30px;width:auto;">
-            <img src="{{ asset('images/partners/mixx_by_yas.svg') }}" alt="Mixx by Yas" style="height:30px;width:auto;">
+            <img src="{{ asset('images/partners/orange_money.svg') }}" alt="Orange Money" style="height:46px;width:auto;">
+            <img src="{{ asset('images/partners/wave.svg') }}" alt="Wave" style="height:42px;width:auto;">
+            <img src="{{ asset('images/partners/mixx_by_yas.svg') }}" alt="Mixx by Yas" style="height:42px;width:auto;">
         </div>
     </div>
 

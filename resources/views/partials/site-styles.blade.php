@@ -92,13 +92,13 @@
     .kicker { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green-deep); margin-bottom: 14px; }
     .kicker::before { content: ""; width: 18px; height: 2px; background: var(--green); border-radius: 2px; }
     h1, h2, h3 { font-family: var(--serif); font-weight: 600; letter-spacing: -0.01em; }
-    .section-head { max-width: 640px; margin: 0 0 56px; }
+    .section-head { max-width: 640px; margin: 0 0 40px; }
     .section-head.center { text-align: center; margin-left: auto; margin-right: auto; }
     .section-head h2 { font-size: 38px; margin: 0 0 16px; }
     .section-head p { color: var(--slate); font-size: 17px; margin: 0; font-family: var(--sans); }
 
-    section { padding: 100px 0; }
-    section.tight { padding: 72px 0; }
+    section { padding: 64px 0; }
+    section.tight { padding: 48px 0; }
     section.alt { background: var(--mist); }
 
     /* ---------- Page hero (inner pages) ---------- */
@@ -145,7 +145,7 @@
 
     /* ---------- Alternating deep-dive rows ---------- */
     .deep-dive { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
-    .deep-dive + .deep-dive { margin-top: 100px; }
+    .deep-dive + .deep-dive { margin-top: 68px; }
     .deep-dive.reverse .deep-visual { order: 2; }
     @media (max-width: 860px) {
         .deep-dive, .deep-dive.reverse { grid-template-columns: 1fr; gap: 32px; }

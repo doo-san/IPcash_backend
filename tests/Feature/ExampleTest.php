@@ -10,10 +10,10 @@ class ExampleTest extends TestCase
     /**
      * A basic test example.
      */
-    public function test_the_root_route_redirects_to_the_admin_panel(): void
+    public function test_the_root_route_serves_the_public_landing_page(): void
     {
         $response = $this->get('/');
 
-        $response->assertRedirect('/admin');
+        $response->assertOk()->assertSee('IPCash');
     }
 }

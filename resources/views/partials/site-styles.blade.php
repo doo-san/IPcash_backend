@@ -280,11 +280,14 @@
     /* ---------- Numbered steps ---------- */
     .steps { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 8px; }
     @media (max-width: 780px) { .steps { grid-template-columns: 1fr; gap: 48px; } }
-    .steps::before {
-        content: ""; position: absolute; top: 27px; left: calc(16.66% + 27px); right: calc(16.66% + 27px);
-        height: 2px; background: repeating-linear-gradient(90deg, var(--line) 0 8px, transparent 8px 16px);
+    .steps::before, .steps::after {
+        content: ""; position: absolute; top: 27px; height: 2px;
+        -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 8px, transparent 8px 16px);
+        mask-image: repeating-linear-gradient(90deg, #000 0 8px, transparent 8px 16px);
     }
-    @media (max-width: 780px) { .steps::before { display: none; } }
+    .steps::before { left: calc(16.66% + 27px); right: 50%; background: linear-gradient(90deg, var(--hero-start), var(--hero-end)); }
+    .steps::after { left: 50%; right: calc(16.66% + 27px); background: linear-gradient(90deg, var(--hero-end), var(--sun)); }
+    @media (max-width: 780px) { .steps::before, .steps::after { display: none; } }
     .step { position: relative; text-align: center; }
     .step .num {
         width: 56px; height: 56px; border-radius: 50%; background: var(--ink); color: #fff;

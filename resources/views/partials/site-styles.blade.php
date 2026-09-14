@@ -291,6 +291,6 @@
     section.dark .security-item .icon { background: rgba(255,255,255,0.08); }
     section.dark .security-item h3 { color: #fff; }
     section.dark .security-item p { color: rgba(255,255,255,0.6); }
-    section.dark .btn-ghost { border-color: rgba(255,255,255,0.25); color: #fff; }
+    section.dark .btn-ghost { background: transparent; border-color: rgba(255,255,255,0.25); color: #fff; }
     section.dark .btn-ghost:hover { border-color: #fff; }
 </style>

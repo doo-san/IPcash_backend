@@ -10,10 +10,7 @@
                         Transférez, épargnez, payez vos factures et changez de devise —
                         tout depuis une seule application, sans passer par une agence.
                     </p>
-                    <div class="cta-row">
-                        <a href="#telecharger" class="btn btn-primary">Télécharger sur l'App Store</a>
-                        <a href="#telecharger" class="btn btn-ghost">Disponible sur Google Play</a>
-                    </div>
+                    <x-store-badges />
                 </div>
                 <div class="reveal-scale" style="display:flex;justify-content:center;position:relative;">
                     <div style="width:280px;border-radius:42px;background:var(--ink);padding:12px;box-shadow:0 40px 80px -30px rgba(14,26,22,0.45),0 10px 24px -12px rgba(14,26,22,0.25);transform:rotate(2deg);">
@@ -165,10 +162,7 @@
             <div class="cta-band reveal-scale">
                 <h2>Prêt à simplifier votre argent ?</h2>
                 <p>IPCash arrive bientôt sur l'App Store et Google Play.</p>
-                <div class="cta-row">
-                    <a href="#" class="btn btn-primary">Télécharger sur l'App Store</a>
-                    <a href="#" class="btn btn-ghost">Disponible sur Google Play</a>
-                </div>
+                <x-store-badges class="center" />
             </div>
         </div>
     </section>

@@ -75,17 +75,17 @@
             </div>
             <div class="steps">
                 <div class="step reveal">
-                    <div class="num">1</div>
+                    <div class="num" style="background:var(--hero-start);">1</div>
                     <h3>Créez votre compte</h3>
                     <p>Votre numéro de téléphone, une vérification d'identité rapide, et c'est parti.</p>
                 </div>
                 <div class="step reveal">
-                    <div class="num">2</div>
+                    <div class="num" style="background:var(--hero-end);">2</div>
                     <h3>Approvisionnez votre solde</h3>
                     <p>Depuis Orange Money, Wave, ou tout autre moyen disponible dans l'app.</p>
                 </div>
                 <div class="step reveal">
-                    <div class="num">3</div>
+                    <div class="num" style="background:var(--sun);">3</div>
                     <h3>Utilisez votre argent</h3>
                     <p>Transférez, épargnez, payez — tout devient possible en quelques taps.</p>
                 </div>

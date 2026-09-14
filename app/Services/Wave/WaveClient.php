@@ -126,6 +126,15 @@ class WaveClient
      */
     private function extractErrorDetail(?array $body): string
     {
-        return $body['message'] ?? $body['code'] ?? 'erreur inconnue';
+        $message = $body['message'] ?? $body['code'] ?? 'erreur inconnue';
+
+        // Sur une erreur de validation (400), Wave détaille le champ fautif
+        // dans `details` — sans ça, "Request invalid" seul ne dit rien
+        // d'exploitable (voir historique des Transaction `failed`).
+        if (isset($body['details']) && is_array($body['details'])) {
+            $message .= ' — '.json_encode($body['details']);
+        }
+
+        return $message;
     }
 }

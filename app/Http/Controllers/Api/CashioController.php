@@ -93,9 +93,9 @@ class CashioController extends Controller
                     fn (string $reference) => (new OrangeMoneyClient($provider))->preparePayment(
                         amountXof: $creditedXof + $feeXof,
                         reference: $reference,
-                        successUrl: route('orange-money.return', ['status' => 'success']),
-                        cancelUrl: route('orange-money.return', ['status' => 'cancel']),
-                        callbackUrl: route('orange-money.webhook'),
+                        successUrl: $this->publicUrl('/orange-money/return?status=success'),
+                        cancelUrl: $this->publicUrl('/orange-money/return?status=cancel'),
+                        callbackUrl: $this->publicUrl('/api/webhooks/orange-money'),
                     ),
                 );
             }
@@ -105,8 +105,8 @@ class CashioController extends Controller
                     fn (string $reference) => (new WaveClient($provider))->createCheckoutSession(
                         amountXof: $creditedXof + $feeXof,
                         reference: $reference,
-                        successUrl: route('wave.return', ['status' => 'success']),
-                        errorUrl: route('wave.return', ['status' => 'error']),
+                        successUrl: $this->publicUrl('/wave/return?status=success'),
+                        errorUrl: $this->publicUrl('/wave/return?status=error'),
                     )['launchUrl'],
                 );
             }
@@ -198,6 +198,19 @@ class CashioController extends Controller
         );
 
         return $this->integrationPending();
+    }
+
+    // Construit une URL absolue à partir d'`APP_URL` plutôt que via
+    // `route()`/`url()` : sans proxy de confiance configuré (`TrustProxies`),
+    // Laravel dérive le domaine racine de la requête entrante plutôt que
+    // d'`APP_URL` — en dev, un appel direct sur l'IP locale ou même via le
+    // tunnel Cloudflare (qui relaie en HTTP simple en interne) produisait
+    // une URL locale que Wave/Orange rejettent (ils exigent du HTTPS
+    // public). Ces URLs doivent toujours pointer vers l'adresse publique
+    // configurée, jamais vers l'hôte de la requête qui nous a appelés.
+    private function publicUrl(string $path): string
+    {
+        return rtrim((string) config('app.url'), '/').$path;
     }
 
     public function cashout(CashoutRequest $request): JsonResponse

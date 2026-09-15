@@ -15,7 +15,6 @@
 
     <section class="page-hero">
         <div class="wrap reveal">
-            <span class="kicker">Sécurité</span>
             <h1>Conçu pour que vous gardiez toujours le contrôle.</h1>
             <p class="lede">Une néobanque se juge à la confiance qu'elle inspire. Voici, concrètement, comment votre argent et vos données sont protégés à chaque étape.</p>
         </div>

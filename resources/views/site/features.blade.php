@@ -88,72 +88,52 @@
                 <div class="deep-visual grad-1 reveal-scale"><span class="big-icon-badge" style="background:var(--sun);">{!! $iconSvg('exchange', 44) !!}</span></div>
             </div>
 
-            <div class="deep-dive reverse" id="carte">
-                <div class="reveal">
-                    <span class="kicker">Carte virtuelle</span>
-                    <h3>Payez en ligne, sans exposer votre carte réelle</h3>
-                    <p class="desc">Générez une carte prépayée en un instant pour vos achats en ligne. Rechargez-la depuis votre solde principal et gardez le contrôle total sur son plafond.</p>
-                    <ul class="check-list">
-                        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FFF6E9"/><path d="M8 12l2.5 2.5L16 9" stroke="#8A5A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Génération instantanée</li>
-                        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FFF6E9"/><path d="M8 12l2.5 2.5L16 9" stroke="#8A5A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Gel ou blocage à tout moment</li>
-                        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FFF6E9"/><path d="M8 12l2.5 2.5L16 9" stroke="#8A5A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Aucune donnée bancaire réelle exposée</li>
-                    </ul>
-                </div>
-                <div class="deep-visual grad-2 reveal-scale"><span class="big-icon-badge" style="background:var(--pink);">{!! $iconSvg('card', 44) !!}</span></div>
-            </div>
+        </div>
+    </section>
 
-            <div class="deep-dive" id="epargne">
-                <div class="reveal">
-                    <span class="kicker">Poches d'épargne</span>
-                    <h3>Mettez de l'argent de côté, sans y penser</h3>
-                    <p class="desc">Créez des poches dédiées à vos projets — vacances, imprévu, achat — et suivez votre progression sans toucher à votre solde principal.</p>
-                    <ul class="check-list">
-                        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#E9FBF4"/><path d="M8 12l2.5 2.5L16 9" stroke="#05613A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Autant de poches que nécessaire</li>
-                        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#E9FBF4"/><path d="M8 12l2.5 2.5L16 9" stroke="#05613A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Transfert instantané vers/depuis le solde principal</li>
-                    </ul>
-                </div>
-                <div class="deep-visual grad-4 reveal-scale"><span class="big-icon-badge" style="background:var(--green);">{!! $iconSvg('wallet', 44) !!}</span></div>
+    <section class="alt tight">
+        <div class="wrap">
+            <div class="section-head center reveal">
+                <h2>Et pour le reste, on a pensé à tout</h2>
+                <p>Cinq autres services, toujours dans la même app.</p>
             </div>
-
-            <div class="deep-dive reverse" id="factures">
-                <div class="reveal">
-                    <span class="kicker">Factures &amp; QR</span>
-                    <h3>Fini la file d'attente pour payer vos factures</h3>
-                    <p class="desc">Eau, électricité, Canal+ et bien plus — réglez vos factures récurrentes en quelques taps, ou scannez un code QR chez un commerçant partenaire.</p>
-                    <ul class="check-list">
-                        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#EAF0FF"/><path d="M8 12l2.5 2.5L16 9" stroke="#1E3A9E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Comptes de facturation enregistrés</li>
-                        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#EAF0FF"/><path d="M8 12l2.5 2.5L16 9" stroke="#1E3A9E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Paiement marchand par QR code</li>
-                    </ul>
+            <div class="compact-grid">
+                <div class="compact-card reveal" id="carte">
+                    <div class="icon" style="background:var(--pink);">{!! $iconSvg('card', 20) !!}</div>
+                    <div>
+                        <h3>Carte virtuelle</h3>
+                        <p>Carte prépayée instantanée pour payer en ligne, sans exposer vos vraies coordonnées bancaires.</p>
+                    </div>
                 </div>
-                <div class="deep-visual grad-3 reveal-scale"><span class="big-icon-badge" style="background:var(--hero-end);">{!! $iconSvg('qr', 44) !!}</span></div>
-            </div>
-
-            <div class="deep-dive" id="credit-esim">
-                <div class="reveal">
-                    <span class="kicker">Crédit &amp; eSIM</span>
-                    <h3>Restez connecté, où que vous soyez</h3>
-                    <p class="desc">Rechargez votre forfait mobile en quelques secondes, ou activez un eSIM avant un voyage — sans passer par un point de vente physique.</p>
-                    <ul class="check-list">
-                        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FFF6E9"/><path d="M8 12l2.5 2.5L16 9" stroke="#8A5A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Recharge crédit instantanée</li>
-                        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#FFF6E9"/><path d="M8 12l2.5 2.5L16 9" stroke="#8A5A00" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Forfaits eSIM voyage</li>
-                    </ul>
+                <div class="compact-card reveal" id="epargne">
+                    <div class="icon" style="background:var(--green);">{!! $iconSvg('wallet', 20) !!}</div>
+                    <div>
+                        <h3>Poches d'épargne</h3>
+                        <p>Mettez de côté pour vos projets, séparément de votre solde principal.</p>
+                    </div>
                 </div>
-                <div class="deep-visual grad-2 reveal-scale"><span class="big-icon-badge" style="background:var(--sun);">{!! $iconSvg('signal', 44) !!}</span></div>
-            </div>
-
-            <div class="deep-dive reverse" id="assurance">
-                <div class="reveal">
-                    <span class="kicker">Assurance</span>
-                    <h3>Votre assurance auto, sans paperasse</h3>
-                    <p class="desc">Souscrivez une assurance auto directement depuis votre compte IPCash et gérez votre contrat sans vous déplacer.</p>
-                    <ul class="check-list">
-                        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#E9FBF4"/><path d="M8 12l2.5 2.5L16 9" stroke="#05613A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Souscription en quelques minutes</li>
-                        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#E9FBF4"/><path d="M8 12l2.5 2.5L16 9" stroke="#05613A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Paiement directement depuis votre solde</li>
-                    </ul>
+                <div class="compact-card reveal" id="factures">
+                    <div class="icon" style="background:var(--hero-end);">{!! $iconSvg('qr', 20) !!}</div>
+                    <div>
+                        <h3>Factures &amp; QR</h3>
+                        <p>Eau, électricité, Canal+ et paiements marchands par simple scan.</p>
+                    </div>
                 </div>
-                <div class="deep-visual grad-4 reveal-scale"><span class="big-icon-badge" style="background:var(--pink);">{!! $iconSvg('shield', 44) !!}</span></div>
+                <div class="compact-card reveal" id="credit-esim">
+                    <div class="icon" style="background:var(--sun);">{!! $iconSvg('signal', 20) !!}</div>
+                    <div>
+                        <h3>Crédit &amp; eSIM</h3>
+                        <p>Recharge de forfait ou eSIM voyage, activés en quelques secondes.</p>
+                    </div>
+                </div>
+                <div class="compact-card reveal" id="assurance">
+                    <div class="icon" style="background:var(--pink);">{!! $iconSvg('shield', 20) !!}</div>
+                    <div>
+                        <h3>Assurance</h3>
+                        <p>Souscrivez une assurance auto directement depuis votre solde.</p>
+                    </div>
+                </div>
             </div>
-
         </div>
     </section>
 

@@ -184,6 +184,20 @@
     .feature-nav a:hover { border-color: var(--ink); transform: translateY(-1px); }
     .feature-nav-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
+    /* ---------- Compact secondary feature grid ---------- */
+    .compact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    @media (max-width: 860px) { .compact-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) { .compact-grid { grid-template-columns: 1fr; } }
+    .compact-card {
+        display: flex; gap: 16px; align-items: flex-start; background: #fff; border: 1px solid var(--line);
+        border-radius: var(--radius-md); padding: 22px; scroll-margin-top: 96px;
+        transition: transform .2s, box-shadow .2s;
+    }
+    .compact-card:hover { transform: translateY(-3px); box-shadow: 0 16px 32px -18px rgba(14,26,22,0.25); }
+    .compact-card .icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .compact-card h3 { font-family: var(--sans); font-size: 16px; margin: 0 0 6px; }
+    .compact-card p { font-size: 13.5px; color: var(--slate); margin: 0; }
+
     /* ---------- Security ---------- */
     .security-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
     @media (max-width: 720px) { .security-grid { grid-template-columns: 1fr; } }

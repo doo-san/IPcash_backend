@@ -48,7 +48,6 @@
 
             <div class="deep-dive" id="transfert">
                 <div class="reveal">
-                    <span class="kicker">Transfert P2P</span>
                     <h3>Envoyez de l'argent en quelques secondes</h3>
                     <p class="desc">Choisissez un contact IPCash ou saisissez un numéro de téléphone : l'argent arrive instantanément, confirmé par votre code PIN ou votre empreinte.</p>
                     <ul class="check-list">
@@ -62,7 +61,6 @@
 
             <div class="deep-dive reverse" id="mobile-money">
                 <div class="reveal">
-                    <span class="kicker">Mobile money</span>
                     <h3>Dépôts et retraits Orange Money &amp; Wave</h3>
                     <p class="desc">Rechargez votre solde IPCash depuis votre compte Orange Money ou Wave, ou retirez vers l'un de ces opérateurs — sans passer par un point de vente.</p>
                     <ul class="check-list">
@@ -76,7 +74,6 @@
 
             <div class="deep-dive" id="ipchange">
                 <div class="reveal">
-                    <span class="kicker">IPchange</span>
                     <h3>Vos devises, sous contrôle</h3>
                     <p class="desc">Ouvrez des sous-comptes en devises étrangères, convertissez à tout moment au meilleur taux et envoyez directement en devise à l'international.</p>
                     <ul class="check-list">

@@ -82,7 +82,7 @@
             <div class="section-head center reveal">
                 <h2>Les principes qui guident chaque décision technique</h2>
             </div>
-            <div class="bento" style="grid-auto-rows:170px;">
+            <div class="bento" style="grid-auto-rows:auto;">
                 <div class="card reveal"><div class="icon" style="background:var(--green);">{!! $iconSvg('lock', 20) !!}</div><h3>Rien en clair</h3><p>Code PIN, secrets d'intégration et documents sensibles sont chiffrés, jamais journalisés.</p></div>
                 <div class="card reveal"><div class="icon" style="background:var(--hero-end);">{!! $iconSvg('clock', 20) !!}</div><h3>Pas de fausse réussite</h3><p>Une opération reste "en cours" tant qu'elle n'est pas confirmée — jamais affichée comme réussie par anticipation.</p></div>
                 <div class="card reveal"><div class="icon" style="background:var(--sun);">{!! $iconSvg('key', 20) !!}</div><h3>Jamais deux fois</h3><p>Chaque opération porte une clé unique : impossible d'être débité deux fois pour une même action.</p></div>

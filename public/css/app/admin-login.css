@@ -31,12 +31,18 @@
 
 .ip-login-card {
     width: 100%;
-    max-width: 380px;
+    max-width: 480px;
     background: #ffffff;
     border-radius: 20px;
-    padding: 40px 36px;
+    padding: 48px 56px;
     box-shadow: 0 30px 60px -30px rgba(14, 26, 22, 0.25);
     text-align: center;
+}
+
+@media (max-width: 560px) {
+    .ip-login-card {
+        padding: 36px 28px;
+    }
 }
 
 .ip-login-mark {

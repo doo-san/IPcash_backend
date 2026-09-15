@@ -8,10 +8,10 @@
         $iconSvg = fn (string $key, int $size = 20) => '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'.$icons[$key].'</svg>';
     @endphp
 
-    <section class="page-hero" style="padding-bottom:0;">
+    <section class="page-hero" style="padding-bottom:0;text-align:center;">
         <div class="wrap reveal">
-            <h1>Parlons-en.</h1>
-            <p class="lede">Une question sur l'app, un partenariat, une remarque — écrivez-nous, nous vous répondrons dès que possible.</p>
+            <h1 style="margin-inline:auto;">Contactez-nous.</h1>
+            <p class="lede" style="margin-inline:auto;">Une question sur l'app, un partenariat, une remarque — écrivez-nous, nous vous répondrons dès que possible.</p>
         </div>
     </section>
 

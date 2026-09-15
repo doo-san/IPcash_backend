@@ -5,13 +5,17 @@
             'mail' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
             'clock' => '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
         ];
-        $iconSvg = fn (string $key, int $size = 20) => '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'.$icons[$key].'</svg>';
+        $iconSvg = fn (string $key, int $size = 20, string $stroke = '#fff') => '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="'.$stroke.'" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'.$icons[$key].'</svg>';
     @endphp
 
     <section class="page-hero" style="padding-bottom:0;text-align:center;">
         <div class="wrap reveal">
             <h1 style="margin-inline:auto;">Contactez-nous.</h1>
             <p class="lede" style="margin-inline:auto;">Une question sur l'app, un partenariat, une remarque — écrivez-nous, nous vous répondrons dès que possible.</p>
+            <div class="hero-pill-row">
+                <span class="pill">{!! $iconSvg('mail', 15, '#05613A') !!} Réponse par e-mail</span>
+                <span class="pill">{!! $iconSvg('clock', 15, '#05613A') !!} Sous quelques jours ouvrés</span>
+            </div>
         </div>
     </section>
 

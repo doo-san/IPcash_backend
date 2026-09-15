@@ -111,6 +111,39 @@
     .page-hero p.lede { font-size: 19px; color: var(--slate); max-width: 560px; font-family: var(--sans); margin: 0; }
     @media (max-width: 640px) { .page-hero h1 { font-size: 32px; } }
 
+    /* ---------- Hero variants (differentiate inner-page heroes) ---------- */
+    /* Fonctionnalités : petite pile d'icônes superposées au-dessus du titre */
+    .hero-icon-stack { display: flex; margin-bottom: 22px; }
+    .hero-icon-stack span {
+        width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        border: 3px solid #fff; box-shadow: 0 6px 14px -6px rgba(14,26,22,0.3); margin-inline-start: -10px;
+    }
+    .hero-icon-stack span:first-child { margin-inline-start: 0; }
+
+    /* Sécurité : titre à gauche, badge circulaire à droite */
+    .hero-split { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center; }
+    @media (max-width: 780px) { .hero-split { grid-template-columns: 1fr; } .hero-badge-visual { display: none; } }
+    .hero-badge-visual { position: relative; width: 160px; height: 160px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .hero-badge-ring {
+        position: absolute; inset: 0; border-radius: 50%;
+        background: conic-gradient(from 0deg, var(--hero-start), var(--hero-end), var(--sun), var(--pink), var(--hero-start));
+        opacity: 0.18;
+    }
+    .hero-badge-core {
+        position: relative; width: 108px; height: 108px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, var(--hero-start), var(--hero-end)); box-shadow: 0 20px 40px -14px rgba(14,26,22,0.35);
+    }
+
+    /* À propos : grand guillemet décoratif derrière le titre */
+    .hero-quote-mark {
+        position: absolute; top: -34px; left: -6px; font-family: var(--serif); font-size: 140px; line-height: 1;
+        color: var(--green); opacity: 0.14; pointer-events: none; z-index: -1;
+    }
+    @media (max-width: 640px) { .hero-quote-mark { font-size: 96px; top: -20px; } }
+
+    /* Contact : petites pastilles sous le texte, centrées */
+    .hero-pill-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+
     /* ---------- Stat strip ---------- */
     .stat-strip { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     @media (max-width: 720px) { .stat-strip { grid-template-columns: repeat(2, 1fr); } }

@@ -26,6 +26,11 @@
 
     <section class="page-hero" style="padding-bottom:32px;">
         <div class="wrap reveal">
+            <div class="hero-icon-stack" aria-hidden="true">
+                @foreach (array_slice($sections, 0, 5) as $s)
+                    <span style="background:{{ $s['color'] }};">{!! $iconSvg($s['icon'], 17) !!}</span>
+                @endforeach
+            </div>
             <h1>Une app, huit façons de simplifier votre argent.</h1>
             <p class="lede">Du transfert instantané à l'assurance auto, chaque service IPCash est pensé pour remplacer une file d'attente par quelques secondes sur votre téléphone.</p>
         </div>

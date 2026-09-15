@@ -14,7 +14,8 @@
     @endphp
 
     <section class="page-hero">
-        <div class="wrap reveal">
+        <div class="wrap reveal" style="position:relative;">
+            <span class="hero-quote-mark" aria-hidden="true">&ldquo;</span>
             <h1>Simplifier l'argent, pour tout le monde.</h1>
             <p class="lede">IPCash est né d'un constat simple : gérer son argent au quotidien demande encore trop souvent de jongler entre plusieurs opérateurs, agences et applications.</p>
         </div>

@@ -14,9 +14,17 @@
     @endphp
 
     <section class="page-hero">
-        <div class="wrap reveal">
-            <h1>Conçu pour que vous gardiez toujours le contrôle.</h1>
-            <p class="lede">Une néobanque se juge à la confiance qu'elle inspire. Voici, concrètement, comment votre argent et vos données sont protégés à chaque étape.</p>
+        <div class="wrap">
+            <div class="hero-split reveal">
+                <div>
+                    <h1>Conçu pour que vous gardiez toujours le contrôle.</h1>
+                    <p class="lede">Une néobanque se juge à la confiance qu'elle inspire. Voici, concrètement, comment votre argent et vos données sont protégés à chaque étape.</p>
+                </div>
+                <div class="hero-badge-visual" aria-hidden="true">
+                    <span class="hero-badge-ring"></span>
+                    <span class="hero-badge-core">{!! $iconSvg('lock', 40) !!}</span>
+                </div>
+            </div>
         </div>
     </section>
 

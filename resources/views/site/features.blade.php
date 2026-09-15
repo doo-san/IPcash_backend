@@ -26,7 +26,6 @@
 
     <section class="page-hero" style="padding-bottom:32px;">
         <div class="wrap reveal">
-            <span class="kicker">Fonctionnalités</span>
             <h1>Une app, huit façons de simplifier votre argent.</h1>
             <p class="lede">Du transfert instantané à l'assurance auto, chaque service IPCash est pensé pour remplacer une file d'attente par quelques secondes sur votre téléphone.</p>
         </div>

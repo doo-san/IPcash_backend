@@ -11,11 +11,6 @@
     <section class="page-hero" style="padding-bottom:0;text-align:center;">
         <div class="wrap reveal">
             <h1 style="margin-inline:auto;">Contactez-nous.</h1>
-            <p class="lede" style="margin-inline:auto;">Une question sur l'app, un partenariat, une remarque — écrivez-nous, nous vous répondrons dès que possible.</p>
-            <div class="hero-pill-row">
-                <span class="pill">{!! $iconSvg('mail', 15, '#05613A') !!} Réponse par e-mail</span>
-                <span class="pill">{!! $iconSvg('clock', 15, '#05613A') !!} Sous quelques jours ouvrés</span>
-            </div>
         </div>
     </section>
 

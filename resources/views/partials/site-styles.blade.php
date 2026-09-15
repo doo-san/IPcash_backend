@@ -390,4 +390,20 @@
     section.dark .security-item p { color: rgba(255,255,255,0.6); }
     section.dark .btn-ghost { background: transparent; border-color: rgba(255,255,255,0.25); color: #fff; }
     section.dark .btn-ghost:hover { border-color: #fff; }
+
+    /* ---------- Mission pull-quote (about page) ---------- */
+    .mission-block { max-width: 780px; margin: 0 auto; text-align: center; }
+    .mission-mark { font-family: var(--serif); font-size: 88px; line-height: 1; color: var(--green); opacity: .25; margin: 0 0 -20px; }
+    .mission-lead { font-family: var(--serif); font-size: 30px; line-height: 1.35; margin: 0 0 24px; color: var(--ink); }
+    .mission-sub { font-size: 17px; color: var(--slate); font-family: var(--sans); margin: 0; line-height: 1.75; }
+    @media (max-width: 640px) { .mission-lead { font-size: 23px; } }
+
+    /* ---------- Value rows (about page) ---------- */
+    .value-list { display: flex; flex-direction: column; max-width: 780px; margin: 0 auto; }
+    .value-row { display: flex; gap: 24px; align-items: flex-start; padding: 28px 0; border-bottom: 1px solid var(--line); }
+    .value-row:last-child { border-bottom: none; }
+    .value-icon { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 10px 22px -10px rgba(14,26,22,0.3); }
+    .value-text h3 { font-size: 19px; margin: 0 0 8px; }
+    .value-text p { color: var(--slate); font-size: 15px; margin: 0; font-family: var(--sans); }
+    @media (max-width: 560px) { .value-row { gap: 16px; padding: 22px 0; } .value-icon { width: 44px; height: 44px; } }
 </style>

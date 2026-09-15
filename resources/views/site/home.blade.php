@@ -34,7 +34,7 @@
     <section id="fonctionnalites">
         <div class="wrap">
             <div class="section-head center reveal">
-                <h2>Tout ce dont vous avez besoin, au quotidien</h2>
+                <h2>Votre quotidien en quelques clics</h2>
                 <p>Une seule app pour gérer votre argent, sans jongler entre plusieurs opérateurs.</p>
             </div>
             @php

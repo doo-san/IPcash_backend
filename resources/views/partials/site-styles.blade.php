@@ -174,18 +174,23 @@
     .deep-visual.grad-3 { background: linear-gradient(135deg, #EAF0FF, #F5E9FF); }
     .deep-visual.grad-4 { background: linear-gradient(135deg, #FCEAF6, #E9FBF4); }
 
-    /* ---------- Feature quick nav ---------- */
-    .feature-nav {
-        display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 28px; margin-bottom: 8px;
-        border-bottom: 1px solid var(--line); scrollbar-width: none;
+    /* ---------- Feature quick nav (auto-scrolling marquee) ---------- */
+    .marquee-wrap {
+        overflow: hidden; padding: 4px 0 28px; margin-bottom: 8px; border-bottom: 1px solid var(--line);
+        -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+        mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
     }
-    .feature-nav::-webkit-scrollbar { display: none; }
-    .feature-nav a {
+    .marquee-track { display: flex; width: max-content; animation: marquee 28s linear infinite; }
+    .marquee-track:hover { animation-play-state: paused; }
+    .marquee-group { display: flex; gap: 10px; padding-right: 10px; flex-shrink: 0; }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @media (prefers-reduced-motion: reduce) { .marquee-track { animation: none; } }
+    .marquee-group a {
         display: inline-flex; align-items: center; gap: 9px; flex-shrink: 0; padding: 9px 16px 9px 9px;
         border-radius: 999px; border: 1px solid var(--line); background: #fff; text-decoration: none;
         color: var(--ink); font-size: 13.5px; font-weight: 600; transition: border-color .15s, transform .15s;
     }
-    .feature-nav a:hover { border-color: var(--ink); transform: translateY(-1px); }
+    .marquee-group a:hover { border-color: var(--ink); transform: translateY(-1px); }
     .feature-nav-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
     /* ---------- Compact secondary feature grid ---------- */

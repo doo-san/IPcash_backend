@@ -33,14 +33,20 @@
     </section>
 
     <div class="wrap reveal">
-        <nav class="feature-nav">
-            @foreach ($sections as $s)
-                <a href="#{{ $s['id'] }}">
-                    <span class="feature-nav-icon" style="background:{{ $s['color'] }};">{!! $iconSvg($s['icon'], 16) !!}</span>
-                    {{ $s['label'] }}
-                </a>
-            @endforeach
-        </nav>
+        <div class="marquee-wrap">
+            <div class="marquee-track">
+                @for ($i = 0; $i < 2; $i++)
+                    <nav class="marquee-group" @if ($i === 1) aria-hidden="true" @endif>
+                        @foreach ($sections as $s)
+                            <a href="#{{ $s['id'] }}">
+                                <span class="feature-nav-icon" style="background:{{ $s['color'] }};">{!! $iconSvg($s['icon'], 16) !!}</span>
+                                {{ $s['label'] }}
+                            </a>
+                        @endforeach
+                    </nav>
+                @endfor
+            </div>
+        </div>
     </div>
 
     <section class="tight">

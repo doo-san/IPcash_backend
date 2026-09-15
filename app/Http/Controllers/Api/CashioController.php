@@ -90,24 +90,34 @@ class CashioController extends Controller
             if ($provider->isOrangeMoney()) {
                 return $this->cashinViaWebRedirect(
                     $account, $creditedXof, $feeXof, $promoCode, $idempotencyKey,
-                    fn (string $reference) => (new OrangeMoneyClient($provider))->preparePayment(
-                        amountXof: $creditedXof + $feeXof,
-                        reference: $reference,
-                        successUrl: $this->publicUrl('/orange-money/return?status=success'),
-                        cancelUrl: $this->publicUrl('/orange-money/return?status=cancel'),
-                        callbackUrl: $this->publicUrl('/api/webhooks/orange-money'),
-                    ),
+                    fn (string $reference) => [
+                        'paymentUrl' => (new OrangeMoneyClient($provider))->preparePayment(
+                            amountXof: $creditedXof + $feeXof,
+                            reference: $reference,
+                            successUrl: $this->publicUrl('/orange-money/return?status=success'),
+                            cancelUrl: $this->publicUrl('/orange-money/return?status=cancel'),
+                            callbackUrl: $this->publicUrl('/api/webhooks/orange-money'),
+                        ),
+                        'providerReference' => null,
+                    ],
                 );
             }
             if ($provider->isWave()) {
                 return $this->cashinViaWebRedirect(
                     $account, $creditedXof, $feeXof, $promoCode, $idempotencyKey,
-                    fn (string $reference) => (new WaveClient($provider))->createCheckoutSession(
-                        amountXof: $creditedXof + $feeXof,
-                        reference: $reference,
-                        successUrl: $this->publicUrl('/wave/return?status=success'),
-                        errorUrl: $this->publicUrl('/wave/return?status=error'),
-                    )['launchUrl'],
+                    function (string $reference) use ($provider, $creditedXof, $feeXof) {
+                        $session = (new WaveClient($provider))->createCheckoutSession(
+                            amountXof: $creditedXof + $feeXof,
+                            reference: $reference,
+                            // `ref` (pas fourni par Wave lui-même à la redirection) permet
+                            // au filet de sécurité de /wave/return de retrouver la
+                            // transaction sans dépendre du webhook (voir routes/web.php).
+                            successUrl: $this->publicUrl('/wave/return?status=success&ref='.$reference),
+                            errorUrl: $this->publicUrl('/wave/return?status=error&ref='.$reference),
+                        );
+
+                        return ['paymentUrl' => $session['launchUrl'], 'providerReference' => $session['sessionId']];
+                    },
                 );
             }
         }
@@ -131,11 +141,15 @@ class CashioController extends Controller
 
     // Dépôt via un prestataire à redirection web réellement branché (OM
     // Pay, Wave Checkout...) : le solde n'est crédité qu'à la confirmation
-    // du webhook correspondant, jamais ici — contrairement au cash-in
-    // interne ci-dessus, cette opération dépend d'un vrai tiers (CLAUDE.md
-    // règle 3, trois états). `$preparePayment` reçoit la référence de la
-    // transaction déjà créée et renvoie l'URL de paiement, ou lève
-    // n'importe quelle exception en cas d'échec côté prestataire.
+    // du webhook correspondant (ou, pour Wave, du filet de sécurité posé
+    // sur /wave/return — voir routes/web.php), jamais ici — contrairement
+    // au cash-in interne ci-dessus, cette opération dépend d'un vrai tiers
+    // (CLAUDE.md règle 3, trois états). `$preparePayment` reçoit la
+    // référence de la transaction déjà créée et renvoie
+    // `['paymentUrl' => ..., 'providerReference' => ...]` (la référence
+    // prestataire — l'id de session Wave, notamment — sert à interroger
+    // son statut plus tard ; `null` quand le prestataire n'en fournit pas),
+    // ou lève n'importe quelle exception en cas d'échec côté prestataire.
     private function cashinViaWebRedirect(
         Account $account,
         int $creditedXof,
@@ -154,11 +168,15 @@ class CashioController extends Controller
         ]);
 
         try {
-            $paymentUrl = $preparePayment($transaction->reference);
+            ['paymentUrl' => $paymentUrl, 'providerReference' => $providerReference] = $preparePayment($transaction->reference);
         } catch (Throwable $e) {
             $transaction->update(['status' => 'failed', 'failure_reason' => $e->getMessage()]);
 
             return response()->json((new TransactionResource($transaction->fresh()))->resolve(), 202);
+        }
+
+        if ($providerReference !== null) {
+            $transaction->update(['provider_reference' => $providerReference]);
         }
 
         $promoCode?->increment('redemptions_count');

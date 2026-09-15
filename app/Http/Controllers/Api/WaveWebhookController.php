@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\MobileMoneyProvider;
 use App\Models\Transaction;
+use App\Services\Wave\WaveCheckoutFinalizer;
 use App\Services\Wave\WaveSignature;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\Log;
 // `Transaction.reference` au moment de créer la session.
 class WaveWebhookController extends Controller
 {
+    public function __construct(private readonly WaveCheckoutFinalizer $finalizer) {}
+
     public function handle(Request $request): JsonResponse
     {
         $rawBody = $request->getContent();
@@ -45,11 +48,10 @@ class WaveWebhookController extends Controller
         }
 
         if ($type === 'checkout.session.completed') {
-            $transaction->account()->increment('balance_xof', $transaction->amount_xof);
-            $transaction->update(['status' => 'completed']);
+            $this->finalizer->finalize($transaction, 'succeeded');
         } elseif ($type === 'checkout.session.payment_failed') {
-            $reason = $payload['data']['last_payment_error']['message'] ?? 'Paiement Wave non abouti.';
-            $transaction->update(['status' => 'failed', 'failure_reason' => $reason]);
+            $reason = $payload['data']['last_payment_error']['message'] ?? null;
+            $this->finalizer->finalize($transaction, 'cancelled', $reason);
         }
         // Autre type d'événement : on laisse `pending`, rien à faire.
 

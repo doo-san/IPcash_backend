@@ -116,6 +116,41 @@ class WaveClient
         return $status;
     }
 
+    // GET /v1/checkout/sessions/{id} — filet de sécurité pour le retour
+    // client sur /wave/return (voir routes/web.php et
+    // WaveCheckoutFinalizer) : le webhook peut ne jamais arriver (tunnel de
+    // dev mort, retard réseau...), cette vérification active ne dépend
+    // d'aucune notification externe. Champs confirmés par un appel réel :
+    // `payment_status` (`processing`, `succeeded`, `cancelled`),
+    // `checkout_status` (`open`, `complete`, `expired`), `last_payment_error`.
+    //
+    // @return array{paymentStatus: string, checkoutStatus: string, lastPaymentErrorMessage: ?string}
+    public function getCheckoutSessionStatus(string $sessionId): array
+    {
+        $response = Http::baseUrl($this->baseUrl())
+            ->withToken((string) $this->provider->api_key)
+            ->withHeaders(['Wave-Signature' => WaveSignature::header((string) $this->provider->api_secret, '')])
+            ->get("/v1/checkout/sessions/{$sessionId}");
+
+        if ($response->failed()) {
+            throw new WaveException(
+                'Wave Checkout (statut) a échoué ('.$response->status().'): '.$this->extractErrorDetail($response->json()),
+            );
+        }
+
+        $paymentStatus = $response->json('payment_status');
+        $checkoutStatus = $response->json('checkout_status');
+        if (! is_string($paymentStatus) || ! is_string($checkoutStatus)) {
+            throw new WaveException('Wave Checkout (statut) : réponse sans statut exploitable.');
+        }
+
+        return [
+            'paymentStatus' => $paymentStatus,
+            'checkoutStatus' => $checkoutStatus,
+            'lastPaymentErrorMessage' => $response->json('last_payment_error.message'),
+        ];
+    }
+
     private function baseUrl(): string
     {
         return rtrim((string) ($this->provider->api_base_url ?: 'https://api.wave.com'), '/');

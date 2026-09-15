@@ -2,9 +2,11 @@
  * Écran de connexion : une carte simple centrée sur un fond dégradé aux
  * couleurs IPCash, plutôt que la carte grise par défaut de Filament (une
  * première version en deux volets a été jugée trop "corporate" et
- * remplacée par ceci). Layout/vue personnalisés dans
- * resources/views/filament/pages/auth/ (voir App\Filament\Pages\Auth\Login),
- * ce fichier ne fait que les habiller.
+ * remplacée par ceci). Toujours clair, y compris pour un visiteur en
+ * thème système sombre — la classe `dark` est retirée côté layout (voir
+ * login-layout.blade.php), donc aucune règle `dark:` n'est nécessaire ici.
+ * Layout/vue personnalisés dans resources/views/filament/pages/auth/ (voir
+ * App\Filament\Pages\Auth\Login), ce fichier ne fait que les habiller.
  *
  * CSS simple enregistré comme asset (cf. admin-sidebar.css) plutôt qu'un
  * thème Filament compilé — même contrainte Tailwind v3/v4 documentée
@@ -61,26 +63,4 @@
 
 .ip-login-card form {
     text-align: left;
-}
-
-/* Mode sombre : la carte garde un fond sombre pour rester lisible avec le
-   texte blanc que Filament applique par défaut aux champs du formulaire
-   (`dark:text-white`), non ré-habillés ici (voir en-tête du fichier). */
-html.dark .ip-login {
-    background:
-        radial-gradient(circle at 15% 15%, rgba(62, 220, 180, 0.16), transparent 45%),
-        radial-gradient(circle at 88% 12%, rgba(58, 76, 242, 0.16), transparent 45%),
-        #0e1a16;
-}
-
-html.dark .ip-login-card {
-    background: #101828;
-}
-
-html.dark .ip-login-head h1 {
-    color: #ffffff;
-}
-
-html.dark .ip-login-head p {
-    color: rgba(255, 255, 255, 0.6);
 }

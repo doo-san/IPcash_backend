@@ -77,7 +77,7 @@
         </div>
     </section>
 
-    <section class="dark">
+    <section class="brand-mesh">
         <div class="wrap">
             <div class="section-head center reveal">
                 <h2>Les principes qui guident chaque décision technique</h2>

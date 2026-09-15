@@ -366,6 +366,17 @@
     .step h3 { font-family: var(--sans); font-size: 17px; margin: 0 0 8px; }
     .step p { font-size: 14.5px; color: var(--slate); margin: 0; max-width: 260px; margin-inline: auto; }
 
+    /* ---------- Brand-colored mesh section ---------- */
+    section.brand-mesh {
+        position: relative; overflow: hidden;
+        background:
+            radial-gradient(circle at 10% 15%, rgba(62,220,180,0.22), transparent 42%),
+            radial-gradient(circle at 90% 10%, rgba(58,76,242,0.18), transparent 45%),
+            radial-gradient(circle at 15% 90%, rgba(255,182,72,0.18), transparent 42%),
+            radial-gradient(circle at 90% 90%, rgba(242,111,160,0.16), transparent 45%),
+            #fff;
+    }
+
     /* ---------- Dark section (contrast break) ---------- */
     section.dark { background: var(--ink); color: #fff; }
     section.dark .kicker { color: var(--hero-start); }

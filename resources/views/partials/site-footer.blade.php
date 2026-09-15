@@ -44,7 +44,6 @@
         </div>
         <div class="footer-bottom">
             <p>© {{ date('Y') }} IPCash. Tous droits réservés.</p>
-            <p class="footer-tagline">Fait avec soin au Sénégal 🇸🇳</p>
         </div>
     </div>
 </footer>

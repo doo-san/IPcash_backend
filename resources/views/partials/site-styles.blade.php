@@ -213,30 +213,26 @@
     .store-badge strong { font-size: 21px; font-weight: 700; font-family: var(--sans); letter-spacing: -0.01em; }
 
     /* ---------- Footer ---------- */
-    .site-footer { background: var(--ink); padding: 72px 0 32px; position: relative; overflow: hidden; }
-    .site-footer::before {
-        content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
-        background: linear-gradient(90deg, var(--hero-start), var(--hero-end), var(--sun));
-    }
-    .site-footer .logo { color: #fff; }
+    .site-footer { background: #fff; border-top: 1px solid var(--line); padding: 72px 0 32px; position: relative; overflow: hidden; }
+    .site-footer .logo { color: var(--ink); }
     .footer-grid { display: grid; grid-template-columns: 1.4fr repeat(4, 1fr); gap: 32px; margin-bottom: 52px; }
     @media (max-width: 860px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
     @media (max-width: 520px) { .footer-grid { grid-template-columns: 1fr; } }
     .footer-brand .logo { margin-bottom: 16px; }
-    .footer-brand p { color: rgba(255,255,255,0.55); font-size: 14px; max-width: 280px; margin: 0 0 22px; line-height: 1.6; }
+    .footer-brand p { color: var(--slate); font-size: 14px; max-width: 280px; margin: 0 0 22px; line-height: 1.6; }
     .footer-social { display: flex; gap: 10px; }
     .footer-social a {
-        width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.06);
-        border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+        width: 36px; height: 36px; border-radius: 10px; background: var(--mist);
+        border: 1px solid var(--line); color: var(--slate);
         display: flex; align-items: center; justify-content: center; transition: background .15s, color .15s;
     }
-    .footer-social a:hover { background: rgba(255,255,255,0.14); color: #fff; }
-    .footer-col h4 { font-family: var(--sans); font-size: 12.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; margin: 0 0 18px; color: rgba(255,255,255,0.4); }
+    .footer-social a:hover { background: var(--mist-deep); color: var(--ink); }
+    .footer-col h4 { font-family: var(--sans); font-size: 12.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; margin: 0 0 18px; color: var(--slate-light); }
     .footer-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
-    .footer-col a { font-size: 14.5px; text-decoration: none; color: rgba(255,255,255,0.8); font-weight: 500; transition: color .15s; }
-    .footer-col a:hover { color: var(--hero-start); }
-    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-    .footer-bottom p { margin: 0; font-size: 13px; color: rgba(255,255,255,0.45); }
+    .footer-col a { font-size: 14.5px; text-decoration: none; color: var(--ink); font-weight: 500; transition: color .15s; }
+    .footer-col a:hover { color: var(--green-deep); }
+    .footer-bottom { border-top: 1px solid var(--line); padding-top: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .footer-bottom p { margin: 0; font-size: 13px; color: var(--slate); }
 
     /* ---------- Misc shared ---------- */
     .pill { display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 8px; border-radius: 999px; background: #fff; color: var(--green-deep); font-weight: 700; font-size: 13px; border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(0,0,0,0.03); }

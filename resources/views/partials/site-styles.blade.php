@@ -151,6 +151,10 @@
         .deep-dive.reverse .deep-visual { order: 0; }
     }
     .deep-dive h3 { font-size: 28px; margin: 0 0 14px; }
+    .feature-tag {
+        display: inline-block; font-family: var(--sans); font-size: 15px; font-weight: 800;
+        padding: 8px 18px; border-radius: 999px; margin-bottom: 18px; letter-spacing: -0.01em;
+    }
     .deep-dive p.desc { color: var(--slate); font-size: 16px; margin: 0 0 24px; font-family: var(--sans); }
     .check-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
     .check-list li { display: flex; gap: 10px; font-size: 14.5px; font-weight: 600; }

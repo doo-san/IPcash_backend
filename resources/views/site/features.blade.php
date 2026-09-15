@@ -32,7 +32,7 @@
         </div>
     </section>
 
-    <div class="wrap reveal">
+    <div class="wrap reveal" style="margin-top:48px;">
         <div class="marquee-wrap">
             <div class="marquee-track">
                 @for ($i = 0; $i < 2; $i++)

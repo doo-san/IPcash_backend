@@ -59,7 +59,11 @@
     nav.main a:hover, nav.main a.active { color: var(--ink); }
     nav.main a.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -27px; height: 2px; background: var(--ink); }
     .header-actions { display: flex; align-items: center; gap: 20px; }
-    .header-actions .login-link { font-size: 14px; font-weight: 600; color: var(--slate); text-decoration: none; }
+    .header-actions .login-link {
+        font-size: 14px; font-weight: 700; color: #fff; text-decoration: none;
+        background: var(--ink); padding: 10px 18px; border-radius: 11px; transition: transform .15s ease;
+    }
+    .header-actions .login-link:hover { transform: translateY(-2px); }
     .header-actions .btn-primary { background: var(--green); box-shadow: 0 8px 20px -8px rgba(0,160,91,0.45); }
     .header-actions .btn-primary:hover { box-shadow: 0 14px 26px -8px rgba(0,160,91,0.5); }
     .nav-toggle { display: none; background: none; border: none; padding: 8px; cursor: pointer; }

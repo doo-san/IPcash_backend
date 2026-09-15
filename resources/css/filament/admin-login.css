@@ -1,0 +1,145 @@
+/*
+ * Écran de connexion à deux volets : panneau de marque (dégradé aux
+ * couleurs IPCash) à gauche, carte de formulaire à droite — plutôt que la
+ * carte centrée par défaut de Filament. Layout/vue personnalisés dans
+ * resources/views/filament/pages/auth/ (voir App\Filament\Pages\Auth\Login),
+ * ce fichier ne fait que les habiller.
+ *
+ * CSS simple enregistré comme asset (cf. admin-sidebar.css) plutôt qu'un
+ * thème Filament compilé — même contrainte Tailwind v3/v4 documentée
+ * là-bas. Les champs du formulaire (TextInput, Checkbox) restent le rendu
+ * Filament par défaut, volontairement non ré-habillés : ils s'intègrent
+ * déjà proprement sur fond blanc et ré-implémenter leur focus/validation en
+ * CSS pur serait fragile pour un gain visuel marginal.
+ */
+
+.ip-login {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+}
+
+@media (max-width: 900px) {
+    .ip-login {
+        grid-template-columns: 1fr;
+    }
+
+    .ip-login-aside {
+        display: none;
+    }
+}
+
+/* ---------- Panneau de marque ---------- */
+.ip-login-aside {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding: 64px;
+    background:
+        radial-gradient(circle at 18% 18%, rgba(62, 220, 180, 0.35), transparent 55%),
+        radial-gradient(circle at 88% 82%, rgba(58, 76, 242, 0.4), transparent 55%),
+        #0e1a16;
+}
+
+.ip-login-aside-inner {
+    max-width: 420px;
+}
+
+.ip-login-logo {
+    height: 34px;
+    margin-bottom: 56px;
+}
+
+.ip-login-aside-inner h2 {
+    font-size: 29px;
+    line-height: 1.35;
+    margin: 0 0 40px;
+    color: #fff;
+    font-weight: 700;
+}
+
+.ip-login-points {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.ip-login-points li {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.ip-login-dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* ---------- Volet formulaire ---------- */
+.ip-login-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    background: #ffffff;
+}
+
+.ip-login-card {
+    width: 100%;
+    max-width: 380px;
+}
+
+.ip-login-head {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.ip-login-mark {
+    height: 40px;
+    margin-bottom: 22px;
+}
+
+.ip-login-head h1 {
+    font-size: 25px;
+    margin: 0 0 8px;
+    color: #0e1a16;
+    font-weight: 700;
+}
+
+.ip-login-head p {
+    font-size: 14.5px;
+    color: #5b6b66;
+    margin: 0;
+}
+
+/* Volet formulaire en mode sombre : la carte elle-même passe en fond
+   sombre plutôt que de rester blanche. Sans ça, les champs du formulaire
+   (rendu Filament par défaut, non ré-habillé — voir en-tête du fichier)
+   gardent leur texte blanc de mode sombre (`dark:text-white`) sur une
+   carte restée blanche : texte invisible pour tout visiteur dont le
+   système est en thème sombre. */
+html.dark .ip-login-main {
+    background: #101828;
+}
+
+html.dark .ip-login-head h1 {
+    color: #ffffff;
+}
+
+html.dark .ip-login-head p {
+    color: rgba(255, 255, 255, 0.6);
+}

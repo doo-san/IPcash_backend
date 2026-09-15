@@ -32,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
         // chaque déploiement/changement.
         FilamentAsset::register([
             Css::make('admin-sidebar', resource_path('css/filament/admin-sidebar.css')),
+            Css::make('admin-login', resource_path('css/filament/admin-login.css')),
         ]);
     }
 
@@ -41,7 +42,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(\App\Filament\Pages\Auth\Login::class)
             ->brandName('IPCash Admin')
             // Logo IPCash — même paire de fichiers que `IpWordmark` côté
             // Flutter (`Color` sur fond clair, `light` tout blanc sur fond

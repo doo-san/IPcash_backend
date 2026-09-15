@@ -143,7 +143,7 @@
     .card p { font-size: 13.5px; color: var(--slate); margin: 0; }
 
     /* ---------- Alternating deep-dive rows ---------- */
-    .deep-dive { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    .deep-dive { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; scroll-margin-top: 96px; }
     .deep-dive + .deep-dive { margin-top: 68px; }
     .deep-dive.reverse .deep-visual { order: 2; }
     @media (max-width: 860px) {
@@ -161,10 +161,28 @@
         overflow: hidden; position: relative;
     }
     .deep-visual .big-icon { font-size: 68px; }
+    .big-icon-badge {
+        width: 108px; height: 108px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 20px 40px -14px rgba(14,26,22,0.35);
+    }
     .deep-visual.grad-1 { background: linear-gradient(135deg, #E9FBF4, #EAF0FF); }
     .deep-visual.grad-2 { background: linear-gradient(135deg, #FFF6E9, #FCEAF6); }
     .deep-visual.grad-3 { background: linear-gradient(135deg, #EAF0FF, #F5E9FF); }
     .deep-visual.grad-4 { background: linear-gradient(135deg, #FCEAF6, #E9FBF4); }
+
+    /* ---------- Feature quick nav ---------- */
+    .feature-nav {
+        display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 28px; margin-bottom: 8px;
+        border-bottom: 1px solid var(--line); scrollbar-width: none;
+    }
+    .feature-nav::-webkit-scrollbar { display: none; }
+    .feature-nav a {
+        display: inline-flex; align-items: center; gap: 9px; flex-shrink: 0; padding: 9px 16px 9px 9px;
+        border-radius: 999px; border: 1px solid var(--line); background: #fff; text-decoration: none;
+        color: var(--ink); font-size: 13.5px; font-weight: 600; transition: border-color .15s, transform .15s;
+    }
+    .feature-nav a:hover { border-color: var(--ink); transform: translateY(-1px); }
+    .feature-nav-icon { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
     /* ---------- Security ---------- */
     .security-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }

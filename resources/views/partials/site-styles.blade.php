@@ -207,6 +207,27 @@
     .compact-card h3 { font-family: var(--sans); font-size: 16px; margin: 0 0 6px; }
     .compact-card p { font-size: 13.5px; color: var(--slate); margin: 0; }
 
+    /* ---------- Vertical timeline (security page) ---------- */
+    .timeline { position: relative; max-width: 760px; margin: 0 auto; }
+    .timeline::before {
+        content: ""; position: absolute; left: 27px; top: 10px; bottom: 10px; width: 2px;
+        background: linear-gradient(var(--hero-start), var(--hero-end), var(--sun), var(--pink));
+    }
+    .timeline-item { position: relative; display: flex; gap: 28px; padding-bottom: 56px; }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-marker {
+        width: 56px; height: 56px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center;
+        justify-content: center; position: relative; z-index: 1; box-shadow: 0 0 0 6px #fff, 0 10px 22px -8px rgba(14,26,22,0.3);
+    }
+    .timeline-content { flex: 1; padding-top: 8px; }
+    .timeline-content h3 { font-size: 22px; margin: 0 0 10px; }
+    .timeline-content p.desc { margin: 0 0 16px; }
+    @media (max-width: 640px) {
+        .timeline::before { left: 21px; }
+        .timeline-marker { width: 44px; height: 44px; }
+        .timeline-item { gap: 18px; }
+    }
+
     /* ---------- Security ---------- */
     .security-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
     @media (max-width: 720px) { .security-grid { grid-template-columns: 1fr; } }

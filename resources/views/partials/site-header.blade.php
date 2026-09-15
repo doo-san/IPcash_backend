@@ -12,8 +12,8 @@
             <a href="{{ route('site.contact') }}" class="{{ request()->routeIs('site.contact') ? 'active' : '' }}">Contact</a>
         </nav>
         <div class="header-actions">
-            <a href="/admin" class="login-link">Se connecter</a>
             <a href="{{ route('site.home') }}#telecharger" class="btn btn-primary btn-sm">Télécharger</a>
+            <a href="/admin" class="login-link">Se connecter</a>
         </div>
         <button class="nav-toggle" type="button" aria-label="Ouvrir le menu" onclick="document.getElementById('mobileNav').classList.toggle('open')">
             <span></span><span></span><span></span>

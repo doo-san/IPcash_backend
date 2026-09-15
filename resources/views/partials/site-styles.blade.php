@@ -48,8 +48,7 @@
     /* ---------- Header ---------- */
     header.site {
         position: sticky; top: 0; z-index: 30;
-        background: rgba(255,255,255,0.85);
-        backdrop-filter: blur(10px);
+        background: #fff;
         border-bottom: 1px solid var(--line);
     }
     header.site .wrap { display: flex; align-items: center; justify-content: space-between; height: 76px; }

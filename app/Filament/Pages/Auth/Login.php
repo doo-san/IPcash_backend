@@ -5,9 +5,9 @@ namespace App\Filament\Pages\Auth;
 use Filament\Pages\Auth\Login as BaseLogin;
 
 /**
- * Écran de connexion à deux volets (panneau de marque + carte de
- * formulaire) plutôt que la carte centrée par défaut de Filament — vue et
- * layout personnalisés, cf. resources/views/filament/pages/auth/.
+ * Écran de connexion : carte simple centrée sur un fond dégradé aux
+ * couleurs IPCash, plutôt que la carte grise par défaut de Filament — vue
+ * et layout personnalisés, cf. resources/views/filament/pages/auth/.
  */
 class Login extends BaseLogin
 {

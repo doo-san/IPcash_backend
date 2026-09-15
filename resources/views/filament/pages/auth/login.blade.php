@@ -1,6 +1,5 @@
 <div>
     <div class="ip-login-head">
-        <img src="{{ asset('images/ipcash-icon.svg') }}" alt="" class="ip-login-mark">
         <h1>Connexion</h1>
         <p>Accédez à l'espace d'administration IPCash.</p>
     </div>

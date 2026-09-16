@@ -1,4 +1,4 @@
-<x-site-layout :title="'À propos'" :description="'La mission d’IPCash : rendre les services financiers du quotidien accessibles depuis un seul téléphone, partout en UEMOA.'">
+<x-site-layout :title="site_setting('seo_about_title')" :description="site_setting('seo_about_description')">
 
     @php
         $icons = [

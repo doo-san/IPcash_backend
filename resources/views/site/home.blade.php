@@ -1,4 +1,4 @@
-<x-site-layout :title="'Accueil'">
+<x-site-layout :title="site_setting('seo_home_title')" :description="site_setting('seo_home_description')">
 
     <section class="hero" style="position:relative;overflow:hidden;padding:56px 0 40px;">
         <div style="content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%, rgba(62,220,180,0.22), transparent 55%), radial-gradient(circle at 80% 0%, rgba(58,76,242,0.16), transparent 50%);z-index:-1;pointer-events:none;"></div>

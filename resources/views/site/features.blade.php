@@ -1,4 +1,4 @@
-<x-site-layout :title="'Fonctionnalités'" :description="'Toutes les fonctionnalités IPCash en détail : transfert, mobile money, IPchange, carte virtuelle, épargne, factures, crédit, eSIM et assurance.'">
+<x-site-layout :title="site_setting('seo_features_title')" :description="site_setting('seo_features_description')">
 
     @php
         $icons = [

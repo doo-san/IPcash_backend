@@ -1,4 +1,4 @@
-<x-site-layout :title="'Sécurité'" :description="'Comment IPCash protège votre argent et vos données : vérification d’identité, code PIN et biométrie, chiffrement, contrôle des sessions et blocage immédiat.'">
+<x-site-layout :title="site_setting('seo_security_title')" :description="site_setting('seo_security_description')">
 
     @php
         $icons = [

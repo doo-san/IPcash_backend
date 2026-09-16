@@ -11,7 +11,7 @@
                     ];
                 @endphp
                 <a href="{{ route('site.home') }}" class="logo"><img src="{{ site_setting_image_url('logo') }}" alt="" class="logo-mark">IPCash</a>
-                <p>La super-app financière pensée pour le Sénégal et l'UEMOA — transférez, épargnez et payez depuis une seule application.</p>
+                <p>{{ site_setting('footer_tagline') }}</p>
                 @if (array_filter($socialLinks))
                     <div class="footer-social">
                         @if ($socialLinks['linkedin'])
@@ -55,8 +55,8 @@
             <div class="footer-col">
                 <h4>Légal</h4>
                 <ul>
-                    <li><a href="#">Conditions d'utilisation</a></li>
-                    <li><a href="#">Confidentialité</a></li>
+                    <li><a href="{{ site_setting('legal_terms_url') ?: '#' }}">Conditions d'utilisation</a></li>
+                    <li><a href="{{ site_setting('legal_privacy_url') ?: '#' }}">Confidentialité</a></li>
                 </ul>
             </div>
         </div>

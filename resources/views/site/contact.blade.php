@@ -1,4 +1,4 @@
-<x-site-layout :title="'Contact'" :description="'Contactez l’équipe IPCash pour toute question, partenariat ou remarque.'">
+<x-site-layout :title="site_setting('seo_contact_title')" :description="site_setting('seo_contact_description')">
 
     @php
         $icons = [

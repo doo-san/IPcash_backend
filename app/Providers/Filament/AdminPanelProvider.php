@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -42,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login(\App\Filament\Pages\Auth\Login::class)
+            ->login(Login::class)
             ->brandName('IPCash Admin')
             // Logo IPCash — même paire de fichiers que `IpWordmark` côté
             // Flutter (`Color` sur fond clair, `light` tout blanc sur fond
@@ -76,6 +77,9 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-banknotes'),
                 NavigationGroup::make('Contenu')
                     ->icon('heroicon-o-chat-bubble-left-right')
+                    ->collapsed(),
+                NavigationGroup::make('Site public')
+                    ->icon('heroicon-o-globe-alt')
                     ->collapsed(),
                 NavigationGroup::make('Configuration')
                     ->icon('heroicon-o-cog-6-tooth')

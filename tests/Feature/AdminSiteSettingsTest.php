@@ -2,7 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Pages\SiteSettingsPage;
+use App\Filament\Pages\SiteImagesPage;
+use App\Filament\Pages\SiteLinksPage;
 use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,17 +13,19 @@ use Livewire\Livewire;
 use Tests\TestCase;
 
 // Réglages globaux du site public (liens réseaux sociaux, liens de
-// téléchargement, images) depuis l'admin — voir config/site_settings.php,
+// téléchargement, images), répartis en deux sous-pages du groupe de
+// navigation "Site public" — voir config/site_settings.php,
 // app/Support/helpers.php (site_setting()/site_setting_image_url()).
 class AdminSiteSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_page_renders(): void
+    public function test_both_pages_render(): void
     {
         $admin = User::factory()->create();
 
-        $this->actingAs($admin)->get('/admin/site-settings-page')->assertOk();
+        $this->actingAs($admin)->get('/admin/site-links-page')->assertOk();
+        $this->actingAs($admin)->get('/admin/site-images-page')->assertOk();
     }
 
     public function test_saving_a_social_link_makes_it_appear_in_the_footer(): void
@@ -30,8 +33,8 @@ class AdminSiteSettingsTest extends TestCase
         $admin = User::factory()->create();
 
         Livewire::actingAs($admin)
-            ->test(SiteSettingsPage::class)
-            ->set('data.links.social_linkedin', 'https://linkedin.com/company/ipcash')
+            ->test(SiteLinksPage::class)
+            ->set('data.social_linkedin', 'https://linkedin.com/company/ipcash')
             ->call('save');
 
         $this->assertSame(
@@ -48,8 +51,8 @@ class AdminSiteSettingsTest extends TestCase
         $admin = User::factory()->create();
 
         Livewire::actingAs($admin)
-            ->test(SiteSettingsPage::class)
-            ->set('data.images.logo', UploadedFile::fake()->image('logo.png'))
+            ->test(SiteImagesPage::class)
+            ->set('data.logo', UploadedFile::fake()->image('logo.png'))
             ->call('save');
 
         $stored = SiteSetting::where('key', 'logo')->value('value');

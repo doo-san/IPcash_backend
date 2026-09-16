@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ContactController;
+use App\Models\LegalPage;
 use App\Models\MobileMoneyProvider;
 use App\Models\Transaction;
 use App\Services\Wave\WaveCheckoutFinalizer;
@@ -21,6 +22,17 @@ Route::get('/contact', fn () => view('site.contact'))->name('site.contact');
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:5,1')
     ->name('site.contact.store');
+
+// Pages légales éditées depuis l'admin (voir
+// App\Filament\Resources\LegalPageResource, app/Models/LegalPage.php) —
+// affichées et listées dans le footer via legal_pages() (app/Support/
+// helpers.php), sans route dédiée par page : n'importe quel slug créé
+// depuis l'admin devient accessible ici sans changement de code.
+Route::get('/legal/{slug}', function (string $slug) {
+    $page = LegalPage::where('slug', $slug)->firstOrFail();
+
+    return view('site.legal', ['page' => $page]);
+})->name('legal.show');
 
 // Page affichée après un paiement OM Pay (succès ou annulation) — l'app
 // intercepte la navigation de la WebView vers cette URL pour fermer

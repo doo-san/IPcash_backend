@@ -52,13 +52,16 @@
                     <li><a href="{{ site_setting('store_google_play') ?: route('site.home').'#telecharger' }}">Google Play</a></li>
                 </ul>
             </div>
-            <div class="footer-col">
-                <h4>Légal</h4>
-                <ul>
-                    <li><a href="{{ site_setting('legal_terms_url') ?: '#' }}">Conditions d'utilisation</a></li>
-                    <li><a href="{{ site_setting('legal_privacy_url') ?: '#' }}">Confidentialité</a></li>
-                </ul>
-            </div>
+            @if (legal_pages()->isNotEmpty())
+                <div class="footer-col">
+                    <h4>Légal</h4>
+                    <ul>
+                        @foreach (legal_pages() as $legalPage)
+                            <li><a href="{{ route('legal.show', $legalPage->slug) }}">{{ $legalPage->title }}</a></li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
         </div>
         <div class="footer-bottom">
             <p>© {{ date('Y') }} IPCash. Tous droits réservés.</p>

@@ -36,6 +36,17 @@
     .wrap { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
     .wrap-narrow { max-width: 820px; margin: 0 auto; padding: 0 24px; }
 
+    /* ---------- Contenu riche (pages légales) ---------- */
+    .legal-content { color: var(--slate); font-size: 16px; line-height: 1.75; padding-bottom: 64px; }
+    .legal-content h2 { color: var(--ink); font-size: 24px; margin: 40px 0 16px; }
+    .legal-content h2:first-child { margin-top: 0; }
+    .legal-content h3 { color: var(--ink); font-size: 19px; margin: 28px 0 12px; }
+    .legal-content p { margin: 0 0 16px; }
+    .legal-content ul, .legal-content ol { margin: 0 0 16px; padding-left: 22px; }
+    .legal-content li { margin-bottom: 8px; }
+    .legal-content a { color: var(--green-deep); }
+    .legal-content strong { color: var(--ink); }
+
     /* ---------- Reveal-on-scroll ---------- */
     .reveal { opacity: 0; transform: translateY(28px); transition: opacity .7s cubic-bezier(.16,.8,.3,1), transform .7s cubic-bezier(.16,.8,.3,1); }
     .reveal.in { opacity: 1; transform: translateY(0); }

@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\LegalPage;
 use App\Models\SiteContent;
 use App\Models\SiteSetting;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('site_content')) {
@@ -71,5 +73,17 @@ if (! function_exists('site_setting_image_url')) {
         $value = SiteSetting::query()->where('key', $key)->value('value');
 
         return filled($value) ? Storage::disk('public')->url($value) : asset($default);
+    }
+}
+
+if (! function_exists('legal_pages')) {
+    // Pages légales (Conditions d'utilisation, Confidentialité...) éditées
+    // depuis l'admin (App\Filament\Resources\LegalPageResource) — listées
+    // dynamiquement dans le footer plutôt que par deux liens en dur, pour
+    // qu'en ajouter une (mentions légales...) n'exige aucun changement de
+    // vue.
+    function legal_pages(): Collection
+    {
+        return LegalPage::query()->orderBy('title')->get();
     }
 }

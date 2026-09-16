@@ -38,8 +38,6 @@ return [
             'social_instagram' => ['label' => 'Instagram', 'type' => 'url', 'default' => ''],
             'social_x' => ['label' => 'X (Twitter)', 'type' => 'url', 'default' => ''],
             'social_facebook' => ['label' => 'Facebook', 'type' => 'url', 'default' => ''],
-            'legal_terms_url' => ['label' => "Lien \"Conditions d'utilisation\"", 'type' => 'url', 'default' => ''],
-            'legal_privacy_url' => ['label' => 'Lien "Confidentialité"', 'type' => 'url', 'default' => ''],
         ],
     ],
 

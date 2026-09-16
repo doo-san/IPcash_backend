@@ -55,9 +55,9 @@
     .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; text-decoration: none; color: var(--ink); letter-spacing: -0.01em; }
     .logo-mark { width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0; object-fit: contain; }
     nav.main { display: flex; gap: 32px; }
-    nav.main a { text-decoration: none; color: var(--slate); font-weight: 600; font-size: 15px; transition: color .15s; position: relative; }
-    nav.main a:hover, nav.main a.active { color: var(--ink); }
-    nav.main a.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -27px; height: 2px; background: var(--ink); }
+    nav.main a { text-decoration: none; color: var(--ink); font-weight: 600; font-size: 15px; transition: color .15s; position: relative; }
+    nav.main a:hover, nav.main a.active { color: var(--green); }
+    nav.main a.active::after { content: ""; position: absolute; left: 0; right: 0; bottom: -27px; height: 2px; background: var(--green); }
     .header-actions { display: flex; align-items: center; gap: 20px; }
     .header-actions .login-link {
         font-size: 14px; font-weight: 700; color: #fff; text-decoration: none;

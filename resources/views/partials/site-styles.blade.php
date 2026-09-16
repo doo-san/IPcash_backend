@@ -345,7 +345,7 @@
     .footer-col h4 { font-family: var(--sans); font-size: 12.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.07em; margin: 0 0 18px; color: var(--slate-light); }
     .footer-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 13px; }
     .footer-col a { font-size: 14.5px; text-decoration: none; color: var(--ink); font-weight: 500; transition: color .15s; }
-    .footer-col a:hover { color: var(--green-deep); }
+    .footer-col a:hover { color: var(--green); }
     .footer-bottom { border-top: 1px solid var(--line); padding-top: 28px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
     .footer-bottom p { margin: 0; font-size: 13px; color: var(--slate); }
 

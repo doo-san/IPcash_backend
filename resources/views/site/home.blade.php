@@ -13,7 +13,7 @@
                 </div>
                 <div class="reveal-scale" style="display:flex;justify-content:center;position:relative;">
                     <div style="width:280px;border-radius:42px;background:var(--ink);padding:12px;box-shadow:0 40px 80px -30px rgba(14,26,22,0.45),0 10px 24px -12px rgba(14,26,22,0.25);transform:rotate(2deg);">
-                        <img src="{{ asset('images/screenshots/dashboard.png') }}" alt="Tableau de bord IPCash" style="display:block;width:100%;border-radius:32px;">
+                        <img src="{{ site_setting_image_url('hero_screenshot') }}" alt="Tableau de bord IPCash" style="display:block;width:100%;border-radius:32px;">
                     </div>
                 </div>
             </div>
@@ -24,9 +24,9 @@
 
     <div class="wrap reveal partner-strip" style="padding-top:40px;padding-bottom:8px;">
         <div style="display:flex;align-items:center;justify-content:center;gap:56px;flex-wrap:wrap;opacity:0.85;">
-            <img src="{{ asset('images/partners/orange_money.svg') }}" alt="Orange Money" style="height:46px;width:auto;">
-            <img src="{{ asset('images/partners/wave.svg') }}" alt="Wave" style="height:42px;width:auto;">
-            <img src="{{ asset('images/partners/mixx_by_yas.svg') }}" alt="Mixx by Yas" style="height:42px;width:auto;">
+            <img src="{{ site_setting_image_url('partner_orange_money') }}" alt="Orange Money" style="height:46px;width:auto;">
+            <img src="{{ site_setting_image_url('partner_wave') }}" alt="Wave" style="height:42px;width:auto;">
+            <img src="{{ site_setting_image_url('partner_mixx_by_yas') }}" alt="Mixx by Yas" style="height:42px;width:auto;">
         </div>
     </div>
 
@@ -97,7 +97,7 @@
         </div>
     </section>
 
-    <section class="dark" style="background-image:linear-gradient(rgba(5,10,25,.3),rgba(5,10,25,.3)),url('{{ asset('images/backgrounds/security-section.jpeg') }}');background-size:cover;background-position:center;">
+    <section class="dark" style="background-image:linear-gradient(rgba(5,10,25,.3),rgba(5,10,25,.3)),url('{{ site_setting_image_url('security_background') }}');background-size:cover;background-position:center;">
         <div class="wrap">
             <div class="section-head center reveal">
                 <h2>{{ site_content('home', 'security_heading') }}</h2>

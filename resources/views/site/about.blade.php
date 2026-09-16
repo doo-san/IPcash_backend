@@ -16,8 +16,8 @@
     <section class="page-hero">
         <div class="wrap reveal" style="position:relative;">
             <span class="hero-quote-mark" aria-hidden="true">&ldquo;</span>
-            <h1>Simplifier l'argent, pour tout le monde.</h1>
-            <p class="lede">IPCash est né d'un constat simple : gérer son argent au quotidien demande encore trop souvent de jongler entre plusieurs opérateurs, agences et applications.</p>
+            <h1>{{ site_content('about', 'hero_title') }}</h1>
+            <p class="lede">{{ site_content('about', 'hero_subtitle') }}</p>
         </div>
     </section>
 
@@ -25,8 +25,8 @@
         <div class="wrap">
             <div class="mission-block reveal">
                 <div class="mission-mark">"</div>
-                <p class="mission-lead">Remplacer plusieurs applications, agences et files d'attente par une seule — pour la zone UEMOA, en commençant par le Sénégal.</p>
-                <p class="mission-sub">Nous croyons qu'un service financier doit être aussi simple à utiliser qu'à comprendre : pas de jargon, pas de frais cachés, et un statut clair sur chaque opération — en cours, confirmée ou échouée, jamais autre chose.</p>
+                <p class="mission-lead">{{ site_content('about', 'mission_lead') }}</p>
+                <p class="mission-sub">{{ site_content('about', 'mission_sub') }}</p>
             </div>
         </div>
     </section>
@@ -34,7 +34,7 @@
     <section class="alt">
         <div class="wrap">
             <div class="section-head center reveal">
-                <h2>Trois principes qui guident chaque décision</h2>
+                <h2>{{ site_content('about', 'values_heading') }}</h2>
             </div>
             <div class="value-list">
                 <div class="value-row reveal">
@@ -65,8 +65,8 @@
     <section class="tight">
         <div class="wrap">
             <div class="section-head center reveal">
-                <h2>Ce que nous vous devons</h2>
-                <p>Un engagement, pas une promesse marketing.</p>
+                <h2>{{ site_content('about', 'commitments_heading') }}</h2>
+                <p>{{ site_content('about', 'commitments_subheading') }}</p>
             </div>
             <div class="bento" style="grid-template-columns:repeat(2,1fr);grid-auto-rows:auto;">
                 <div class="card reveal"><div class="icon" style="background:var(--green);">{!! $iconSvg('tag', 20) !!}</div><h3>Frais annoncés d'avance</h3><p>Aucun frais n'apparaît après coup : tout est affiché avant que vous confirmiez.</p></div>
@@ -81,8 +81,8 @@
     <section class="tight">
         <div class="wrap">
             <div class="cta-band reveal-scale">
-                <h2>Envie d'en discuter ?</h2>
-                <p>Une question, un partenariat, une remarque — écrivez-nous.</p>
+                <h2>{{ site_content('about', 'cta_heading') }}</h2>
+                <p>{{ site_content('about', 'cta_subheading') }}</p>
                 <div class="cta-row">
                     <a href="{{ route('site.contact') }}" class="btn btn-primary">Nous contacter</a>
                     <a href="{{ route('site.features') }}" class="btn btn-ghost">Voir les fonctionnalités</a>

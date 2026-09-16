@@ -31,8 +31,8 @@
                     <span style="background:{{ $s['color'] }};">{!! $iconSvg($s['icon'], 17) !!}</span>
                 @endforeach
             </div>
-            <h1>Une app, huit façons de simplifier votre argent.</h1>
-            <p class="lede">Du transfert instantané à l'assurance auto, chaque service IPCash est pensé pour remplacer une file d'attente par quelques secondes sur votre téléphone.</p>
+            <h1>{{ site_content('features', 'hero_title') }}</h1>
+            <p class="lede">{{ site_content('features', 'hero_subtitle') }}</p>
         </div>
     </section>
 
@@ -104,8 +104,8 @@
     <section class="alt tight">
         <div class="wrap">
             <div class="section-head center reveal">
-                <h2>Et pour le reste, on a pensé à tout</h2>
-                <p>Cinq autres services, toujours dans la même app.</p>
+                <h2>{{ site_content('features', 'secondary_heading') }}</h2>
+                <p>{{ site_content('features', 'secondary_subheading') }}</p>
             </div>
             <div class="compact-grid">
                 <div class="compact-card reveal" id="carte">
@@ -150,8 +150,8 @@
     <section class="tight">
         <div class="wrap">
             <div class="cta-band reveal-scale">
-                <h2>Découvrez tout ça par vous-même</h2>
-                <p>IPCash arrive bientôt sur l'App Store et Google Play.</p>
+                <h2>{{ site_content('features', 'cta_heading') }}</h2>
+                <p>{{ site_content('features', 'cta_subheading') }}</p>
                 <div class="cta-row">
                     <a href="{{ route('site.home') }}#telecharger" class="btn btn-primary">Télécharger l'app</a>
                     <a href="{{ route('site.security') }}" class="btn btn-ghost">Voir la sécurité</a>

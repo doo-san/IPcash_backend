@@ -17,8 +17,8 @@
         <div class="wrap">
             <div class="hero-split reveal">
                 <div>
-                    <h1>Conçu pour que vous gardiez toujours le contrôle.</h1>
-                    <p class="lede">Une néobanque se juge à la confiance qu'elle inspire. Voici, concrètement, comment votre argent et vos données sont protégés à chaque étape.</p>
+                    <h1>{{ site_content('security', 'hero_title') }}</h1>
+                    <p class="lede">{{ site_content('security', 'hero_subtitle') }}</p>
                 </div>
                 <div class="hero-badge-visual" aria-hidden="true">
                     <span class="hero-badge-ring"></span>
@@ -87,7 +87,7 @@
     <section class="brand-mesh">
         <div class="wrap">
             <div class="section-head center reveal">
-                <h2>Les principes qui guident chaque décision technique</h2>
+                <h2>{{ site_content('security', 'principles_heading') }}</h2>
             </div>
             <div class="bento" style="grid-auto-rows:auto;">
                 <div class="card reveal"><div class="icon" style="background:var(--green);">{!! $iconSvg('lock', 20) !!}</div><h3>Rien en clair</h3><p>Code PIN, secrets d'intégration et documents sensibles sont chiffrés, jamais journalisés.</p></div>
@@ -101,8 +101,8 @@
     <section class="tight">
         <div class="wrap">
             <div class="cta-band reveal-scale">
-                <h2>Des questions sur la sécurité de vos données ?</h2>
-                <p>Notre équipe vous répond directement.</p>
+                <h2>{{ site_content('security', 'cta_heading') }}</h2>
+                <p>{{ site_content('security', 'cta_subheading') }}</p>
                 <div class="cta-row">
                     <a href="{{ route('site.contact') }}" class="btn btn-primary">Nous contacter</a>
                     <a href="{{ route('site.features') }}" class="btn btn-ghost">Voir les fonctionnalités</a>

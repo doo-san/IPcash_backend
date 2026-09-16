@@ -7,8 +7,7 @@
                 <div class="reveal">
                     <h1 style="font-size:58px;line-height:1.08;margin:0 0 22px;">Votre argent,<br><span style="background:linear-gradient(90deg,var(--hero-start),var(--hero-end));-webkit-background-clip:text;background-clip:text;color:transparent;">enfin simple.</span></h1>
                     <p style="font-size:19px;color:var(--slate);max-width:480px;margin:0 0 36px;font-family:var(--sans);">
-                        Transférez, épargnez, payez vos factures et changez de devise —
-                        tout depuis une seule application, sans passer par une agence.
+                        {{ site_content('home', 'hero_subtitle') }}
                     </p>
                     <x-store-badges />
                 </div>
@@ -34,7 +33,7 @@
     <section id="fonctionnalites">
         <div class="wrap">
             <div class="section-head center reveal">
-                <h2>Votre quotidien en quelques clics</h2>
+                <h2>{{ site_content('home', 'features_heading') }}</h2>
             </div>
             @php
                 $icons = [
@@ -75,8 +74,8 @@
     <section class="alt">
         <div class="wrap">
             <div class="section-head center reveal">
-                <h2>Trois étapes, et c'est fait</h2>
-                <p>Pas de dossier, pas de rendez-vous en agence.</p>
+                <h2>{{ site_content('home', 'steps_heading') }}</h2>
+                <p>{{ site_content('home', 'steps_subheading') }}</p>
             </div>
             <div class="steps">
                 <div class="step reveal">
@@ -101,8 +100,8 @@
     <section class="dark" style="background-image:linear-gradient(rgba(5,10,25,.3),rgba(5,10,25,.3)),url('{{ asset('images/backgrounds/security-section.jpeg') }}');background-size:cover;background-position:center;">
         <div class="wrap">
             <div class="section-head center reveal">
-                <h2>Votre sécurité, notre priorité</h2>
-                <p>Votre argent et vos données sont protégés à chaque étape.</p>
+                <h2>{{ site_content('home', 'security_heading') }}</h2>
+                <p>{{ site_content('home', 'security_subheading') }}</p>
             </div>
             <div class="security-grid">
                 <div class="security-item reveal"><div class="icon">🔒</div><div><h3>Code secret &amp; biométrie</h3><p>Chaque opération sensible est confirmée par votre PIN ou Face ID.</p></div></div>
@@ -119,7 +118,7 @@
     <section id="faq">
         <div class="wrap">
             <div class="section-head center reveal">
-                <h2>Tout ce qu'il faut savoir</h2>
+                <h2>{{ site_content('home', 'faq_heading') }}</h2>
             </div>
             <div class="wrap-narrow reveal" style="padding:0;">
                 <details class="faq-item" open>
@@ -145,8 +144,8 @@
     <section id="telecharger" class="tight">
         <div class="wrap">
             <div class="cta-band reveal-scale">
-                <h2>Prêt à simplifier votre argent ?</h2>
-                <p>IPCash arrive bientôt sur l'App Store et Google Play.</p>
+                <h2>{{ site_content('home', 'cta_heading') }}</h2>
+                <p>{{ site_content('home', 'cta_subheading') }}</p>
                 <x-store-badges class="center" />
             </div>
         </div>

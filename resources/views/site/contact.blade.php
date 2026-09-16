@@ -10,7 +10,7 @@
 
     <section class="page-hero" style="padding-bottom:0;text-align:center;">
         <div class="wrap reveal">
-            <h1 style="margin-inline:auto;">Contactez-nous.</h1>
+            <h1 style="margin-inline:auto;">{{ site_content('contact', 'hero_title') }}</h1>
         </div>
     </section>
 
@@ -18,8 +18,8 @@
         <div class="wrap">
             <div class="contact-grid" style="display:grid;grid-template-columns:0.85fr 1.3fr;gap:32px;align-items:stretch;">
                 <div class="reveal contact-panel">
-                    <h2>Autrement</h2>
-                    <p class="desc">Vous préférez ne pas passer par le formulaire ? Voici comment nous joindre.</p>
+                    <h2>{{ site_content('contact', 'panel_heading') }}</h2>
+                    <p class="desc">{{ site_content('contact', 'panel_subheading') }}</p>
                     <div class="contact-item">
                         <div class="value-icon" style="background:var(--green);">{!! $iconSvg('mail') !!}</div>
                         <div>

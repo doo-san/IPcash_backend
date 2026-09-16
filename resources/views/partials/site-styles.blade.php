@@ -66,6 +66,21 @@
     .header-actions .login-link:hover { transform: translateY(-2px); }
     .header-actions .btn-primary { background: var(--green); box-shadow: 0 8px 20px -8px rgba(0,160,91,0.45); }
     .header-actions .btn-primary:hover { box-shadow: 0 14px 26px -8px rgba(0,160,91,0.5); }
+    .header-actions button.btn { font-family: inherit; cursor: pointer; }
+
+    /* ---------- Menu déroulant "Télécharger" (header) ---------- */
+    .download-dropdown { position: relative; }
+    .download-menu {
+        position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+        display: flex; gap: 8px; background: #fff; border: 1px solid var(--line); border-radius: 14px;
+        padding: 8px; box-shadow: 0 16px 32px -12px rgba(14,26,22,0.3); z-index: 20;
+    }
+    .download-menu[hidden] { display: none; }
+    .download-menu a {
+        width: 42px; height: 42px; border-radius: 10px; background: var(--ink);
+        display: flex; align-items: center; justify-content: center; transition: transform .15s ease;
+    }
+    .download-menu a:hover { transform: translateY(-2px); }
     .nav-toggle { display: none; background: none; border: none; padding: 8px; cursor: pointer; }
     .nav-toggle span { display: block; width: 22px; height: 2px; background: var(--ink); margin: 5px 0; border-radius: 2px; }
     @media (max-width: 860px) {

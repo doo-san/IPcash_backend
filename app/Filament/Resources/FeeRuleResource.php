@@ -39,12 +39,28 @@ class FeeRuleResource extends Resource
                 ->options(['percent' => 'Pourcentage', 'fixed' => 'Montant fixe'])
                 ->required()
                 ->live(),
+            // Stocké en points de base (`value` = centièmes de %, voir
+            // `FeeRule::feeFor()` — `intdiv($amount * $value, 10000)`),
+            // mais saisi ici en pourcentage normal (1 = 1 %) : conversion
+            // aller-retour via dehydrateStateUsing/formatStateUsing plutôt
+            // que de changer la colonne, pour ne rien casser côté calcul
+            // ni des données déjà enregistrées.
             Forms\Components\TextInput::make('value')
                 ->label(fn (Forms\Get $get) => $get('type') === 'percent'
-                    ? 'Taux (points de base — 50 = 0,5 %)'
+                    ? 'Taux (%)'
                     : 'Montant (XOF)')
+                ->helperText(fn (Forms\Get $get) => $get('type') === 'percent'
+                    ? 'Ex. 1 pour 1 %, 0,5 pour 0,5 %.'
+                    : null)
                 ->numeric()
-                ->required(),
+                ->step(fn (Forms\Get $get) => $get('type') === 'percent' ? 0.01 : 1)
+                ->required()
+                ->formatStateUsing(fn ($state, Forms\Get $get) => $get('type') === 'percent' && $state !== null
+                    ? $state / 100
+                    : $state)
+                ->dehydrateStateUsing(fn ($state, Forms\Get $get) => $get('type') === 'percent'
+                    ? (int) round(((float) $state) * 100)
+                    : (int) $state),
             Forms\Components\TextInput::make('min_fee_xof')
                 ->label('Frais minimum (XOF)')
                 ->numeric(),

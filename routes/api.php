@@ -146,6 +146,7 @@ Route::middleware(['auth:sanctum', 'account.notBlocked'])->group(function () {
         Route::post('qr/decode', [PaymentController::class, 'decodeQr']);
         Route::post('qr/confirm', [PaymentController::class, 'confirmQrPayment'])->middleware('idempotency');
         Route::get('bills/providers', [PaymentController::class, 'billProviders']);
+        Route::get('bills/{provider}/plans', [PaymentController::class, 'billPlans']);
         Route::post('bills/pay', [PaymentController::class, 'payBill'])->middleware('idempotency');
         Route::get('bills/{provider}/accounts', [PaymentController::class, 'getBillAccounts']);
         Route::post('bills/{provider}/accounts', [PaymentController::class, 'addBillAccount']);

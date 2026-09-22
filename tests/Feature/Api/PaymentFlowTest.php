@@ -166,4 +166,35 @@ class PaymentFlowTest extends TestCase
             'customerReference' => '123456',
         ], $this->authHeader($account))->assertStatus(400)->assertJson(['code' => 'INTEGRATION_PENDING']);
     }
+
+    public function test_bill_plans_lists_only_active_ones_sorted(): void
+    {
+        $account = $this->account();
+        $provider = BillProvider::where('type', 'canalPlus')->first();
+        $provider->plans()->create(['kind' => 'formula', 'code' => 'evasion', 'label' => 'Évasion', 'price_xof' => 11000]);
+        $provider->plans()->create(['kind' => 'formula', 'code' => 'access', 'label' => 'Access', 'price_xof' => 5500]);
+        $provider->plans()->create(['kind' => 'option', 'code' => 'cineSeries', 'label' => 'Ciné Séries', 'price_xof' => 2500, 'is_active' => false]);
+
+        $json = $this->getJson('/api/payments/bills/canalPlus/plans', $this->authHeader($account))->assertOk()->json();
+
+        $this->assertCount(2, $json);
+        $this->assertSame(['Access', 'Évasion'], array_column($json, 'label'));
+        $this->assertSame(5500, $json[0]['priceXof']);
+    }
+
+    public function test_bill_plans_for_unknown_provider_is_not_found(): void
+    {
+        $account = $this->account();
+
+        $this->getJson('/api/payments/bills/not-a-provider/plans', $this->authHeader($account))->assertStatus(404);
+    }
+
+    public function test_bill_plans_empty_for_a_provider_without_plans(): void
+    {
+        $account = $this->account();
+
+        $json = $this->getJson('/api/payments/bills/senelec/plans', $this->authHeader($account))->assertOk()->json();
+
+        $this->assertSame([], $json);
+    }
 }

@@ -14,10 +14,12 @@ use App\Http\Requests\Payment\PayBillRequest;
 use App\Http\Requests\Payment\PayMerchantRequest;
 use App\Http\Requests\Payment\ResolveMerchantRequest;
 use App\Http\Resources\BillAccountResource;
+use App\Http\Resources\BillProviderPlanResource;
 use App\Http\Resources\BillProviderResource;
 use App\Http\Resources\MerchantResource;
 use App\Models\Account;
 use App\Models\BillProvider;
+use App\Models\BillProviderPlan;
 use App\Models\Merchant;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -45,6 +47,22 @@ class PaymentController extends Controller
     {
         return BillProviderResource::collection(
             BillProvider::where('is_active', true)->get(),
+        );
+    }
+
+    public function billPlans(string $provider): AnonymousResourceCollection|JsonResponse
+    {
+        $type = $this->resolveActiveProvider($provider);
+        if ($type instanceof JsonResponse) {
+            return $type;
+        }
+
+        return BillProviderPlanResource::collection(
+            BillProviderPlan::where('bill_provider_type', $type->value)
+                ->where('is_active', true)
+                ->orderBy('kind')
+                ->orderBy('label')
+                ->get(),
         );
     }
 
@@ -112,6 +130,9 @@ class PaymentController extends Controller
         return $this->integrationPending();
     }
 
+    // Point de branchement pour un vrai prestataire : voir
+    // App\Services\Bills\BillPaymentClientInterface. Renvoie toujours
+    // INTEGRATION_PENDING tant que rien ne l'implémente.
     public function payBill(PayBillRequest $request): JsonResponse
     {
         /** @var Account $account */
@@ -176,6 +197,9 @@ class PaymentController extends Controller
         return response()->json((new BillAccountResource($billAccount))->resolve(), 201);
     }
 
+    // Point de branchement pour un vrai prestataire : voir
+    // App\Services\Bills\BillPaymentClientInterface. Renvoie toujours
+    // INTEGRATION_PENDING tant que rien ne l'implémente.
     public function lookupBillInvoice(LookupBillInvoiceRequest $request, string $provider): JsonResponse
     {
         $type = $this->resolveActiveProvider($provider);

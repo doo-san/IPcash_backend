@@ -49,9 +49,6 @@ class FeeRuleResource extends Resource
                 ->label(fn (Forms\Get $get) => $get('type') === 'percent'
                     ? 'Taux (%)'
                     : 'Montant (XOF)')
-                ->helperText(fn (Forms\Get $get) => $get('type') === 'percent'
-                    ? 'Ex. 1 pour 1 %, 0,5 pour 0,5 %.'
-                    : null)
                 ->numeric()
                 ->step(fn (Forms\Get $get) => $get('type') === 'percent' ? 0.01 : 1)
                 ->required()

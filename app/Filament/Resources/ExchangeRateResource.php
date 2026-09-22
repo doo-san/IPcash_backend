@@ -10,11 +10,13 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-// Miroir de `DisplayCurrency` côté Flutter — taux figés aujourd'hui,
-// modifiables ici en attendant que l'app les lise depuis une vraie API
-// (voir le commentaire de la migration). Purement indicatif (CLAUDE.md
-// règle 1) : ne pilote jamais un vrai solde multi-devises hors
-// `ForeignBalance`.
+// Modifier un taux ici a un effet réel et immédiat : l'app le lit via
+// GET /exchange-rates (ForeignBalanceController::exchangeRates()) pour
+// l'aperçu de conversion IPchange, et convertFromXof()/convertToXof()
+// appliquent ce même taux pour de vrai côté `ForeignBalance` — seule
+// exception à la règle 1 de CLAUDE.md (solde réel en devise étrangère).
+// Ailleurs dans l'app, `DisplayCurrency` reste un taux fixe purement
+// indicatif, sans lien avec cette table.
 class ExchangeRateResource extends Resource
 {
     protected static ?string $model = ExchangeRate::class;

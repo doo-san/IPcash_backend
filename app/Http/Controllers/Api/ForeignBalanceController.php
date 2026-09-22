@@ -10,6 +10,7 @@ use App\Http\Requests\Cashio\ConvertFromXofRequest;
 use App\Http\Requests\Cashio\ConvertToXofRequest;
 use App\Http\Requests\Cashio\PayMerchantRequest;
 use App\Http\Requests\Cashio\SendRequest;
+use App\Http\Resources\ExchangeRateResource;
 use App\Http\Resources\ForeignBalanceResource;
 use App\Http\Resources\TransactionResource;
 use App\Models\Account;
@@ -36,6 +37,17 @@ class ForeignBalanceController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         return ForeignBalanceResource::collection($request->user()->foreignBalances);
+    }
+
+    // Catalogue de taux géré depuis l'admin (ExchangeRateResource) — même
+    // table que celle utilisée pour de vrai par convertFromXof()/
+    // convertToXof() ci-dessous. Avant cet endpoint, l'app n'avait aucun
+    // moyen de lire ce taux et affichait un aperçu calculé sur un tableau
+    // codé en dur (`DisplayCurrency`), qui pouvait diverger du montant
+    // réellement crédité par le serveur.
+    public function exchangeRates(): AnonymousResourceCollection
+    {
+        return ExchangeRateResource::collection(ExchangeRate::orderBy('currency_code')->get());
     }
 
     public function convertFromXof(ConvertFromXofRequest $request): JsonResponse

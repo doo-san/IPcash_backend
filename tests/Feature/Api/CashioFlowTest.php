@@ -477,7 +477,7 @@ class CashioFlowTest extends TestCase
 
     public function test_convert_from_xof_uses_exchange_rate(): void
     {
-        ExchangeRate::create(['currency_code' => 'EUR', 'name' => 'Euro', 'rate_to_xof' => 655.957]);
+        ExchangeRate::updateOrCreate(['currency_code' => 'EUR'], ['name' => 'Euro', 'rate_to_xof' => 655.957]);
         $account = $this->account('+221771111111', 100000);
 
         $response = $this->postJson('/api/foreign-balances/convert-from-xof', [
@@ -491,7 +491,7 @@ class CashioFlowTest extends TestCase
 
     public function test_convert_to_xof_credits_main_balance(): void
     {
-        ExchangeRate::create(['currency_code' => 'EUR', 'name' => 'Euro', 'rate_to_xof' => 655.957]);
+        ExchangeRate::updateOrCreate(['currency_code' => 'EUR'], ['name' => 'Euro', 'rate_to_xof' => 655.957]);
         $account = $this->account('+221771111111', 0);
         $account->foreignBalances()->create(['currency_code' => 'EUR', 'amount_minor_units' => 1000]);
 
@@ -506,7 +506,7 @@ class CashioFlowTest extends TestCase
     public function test_ipchange_conversions_apply_the_admin_configured_fee(): void
     {
         FeeRule::create(['scope' => 'foreignExchange', 'type' => 'fixed', 'value' => 100]);
-        ExchangeRate::create(['currency_code' => 'EUR', 'name' => 'Euro', 'rate_to_xof' => 655.957]);
+        ExchangeRate::updateOrCreate(['currency_code' => 'EUR'], ['name' => 'Euro', 'rate_to_xof' => 655.957]);
         $account = $this->account('+221771111111', 100000);
 
         // Aller : les frais s'ajoutent au débit du solde principal.
@@ -552,5 +552,24 @@ class CashioFlowTest extends TestCase
 
         $this->assertCount(1, $json);
         $this->assertSame('EUR', $json[0]['currencyCode']);
+    }
+
+    public function test_exchange_rates_reflects_admin_edits(): void
+    {
+        $account = $this->account('+221771111111');
+        ExchangeRate::updateOrCreate(['currency_code' => 'EUR'], ['name' => 'Euro', 'rate_to_xof' => 655.957]);
+
+        $before = $this->getJson('/api/exchange-rates', $this->authHeader($account))->assertOk()->json();
+        $eurBefore = collect($before)->firstWhere('currencyCode', 'EUR');
+        $this->assertSame(655.957, $eurBefore['rateToXof']);
+
+        // Un admin change le taux : l'endpoint doit refléter la nouvelle
+        // valeur immédiatement — c'est exactement le scénario que
+        // corrige cet endpoint (avant, l'app ne le lisait jamais).
+        ExchangeRate::where('currency_code', 'EUR')->update(['rate_to_xof' => 700]);
+
+        $after = $this->getJson('/api/exchange-rates', $this->authHeader($account))->assertOk()->json();
+        $eurAfter = collect($after)->firstWhere('currencyCode', 'EUR');
+        $this->assertEquals(700, $eurAfter['rateToXof']);
     }
 }

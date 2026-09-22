@@ -131,8 +131,7 @@ class AdminPanelSmokeTest extends TestCase
 
     public function test_exchange_rate_pages_load(): void
     {
-        $rate = ExchangeRate::create([
-            'currency_code' => 'EUR',
+        $rate = ExchangeRate::updateOrCreate(['currency_code' => 'EUR'], [
             'name' => 'Euro',
             'flag' => '🇪🇺',
             'rate_to_xof' => 655.957,

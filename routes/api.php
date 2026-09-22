@@ -88,6 +88,7 @@ Route::middleware(['auth:sanctum', 'account.notBlocked'])->group(function () {
         });
     });
     Route::get('foreign-balances', [ForeignBalanceController::class, 'index']);
+    Route::get('exchange-rates', [ForeignBalanceController::class, 'exchangeRates']);
 
     Route::prefix('cards')->group(function () {
         Route::get('/', [CardController::class, 'index']);

@@ -29,6 +29,9 @@ class CreditController extends Controller
         );
     }
 
+    // Point de branchement pour un vrai prestataire : voir
+    // App\Services\Credit\CreditTopUpClientInterface. Renvoie toujours
+    // INTEGRATION_PENDING tant que rien ne l'implémente.
     public function purchase(CreditPurchaseRequest $request): JsonResponse
     {
         /** @var Account $account */

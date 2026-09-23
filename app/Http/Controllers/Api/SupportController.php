@@ -25,13 +25,16 @@ class SupportController extends Controller
 {
     public function __construct(private readonly AiSupportChatService $ai) {}
 
-    // Contenu éditable dans l'admin (AppSettingResource, FaqEntryResource)
-    // consommé par l'écran d'aide (`support_screen.dart`) — jusqu'ici tous
-    // deux codés en dur côté app (numéro de téléphone, 6 questions dans
-    // app_fr.arb/app_en.arb) sans aucun effet réel malgré l'existence de
-    // ces deux écrans d'admin. Le numéro garde un défaut en dur ici (même
-    // valeur qu'avant) pour ne rien casser tant que la ligne `AppSetting`
-    // n'a pas été créée par un opérateur.
+    // Numéro éditable dans l'admin (AppSettingResource) — consommé par le
+    // bouton d'appel de `profile_screen.dart` côté app. Garde un défaut en
+    // dur ici (même valeur que le repli côté app) pour ne rien casser tant
+    // que la ligne `AppSetting` n'a pas été créée par un opérateur.
+    //
+    // `faq` reste dans la réponse pour ne pas casser le contrat
+    // (`api/openapi.yaml`), mais l'app ne l'affiche plus — ces mêmes
+    // entrées (FaqEntryResource) servent maintenant de base de
+    // connaissance au chatbot IA (voir AiSupportChatService::systemPrompt),
+    // ce qui reste leur véritable consommateur.
     public function config(Request $request): JsonResponse
     {
         /** @var Account $account */

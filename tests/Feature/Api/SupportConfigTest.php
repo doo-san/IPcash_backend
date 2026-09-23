@@ -8,9 +8,12 @@ use App\Models\FaqEntry;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-// GET /support/config — expose ce que AppSettingResource et
-// FaqEntryResource permettent d'éditer dans l'admin (numéro de support,
-// questions fréquentes), jusqu'ici sans aucun effet réel côté app.
+// GET /support/config — expose le numéro de support édité dans l'admin
+// (AppSettingResource), consommé par le bouton d'appel de
+// `profile_screen.dart` côté app. Le champ `faq` reste dans la réponse
+// pour le contrat (`api/openapi.yaml`) mais n'est plus affiché côté app —
+// ces mêmes entrées (FaqEntryResource) alimentent désormais le chatbot IA
+// (voir AiSupportChatService).
 class SupportConfigTest extends TestCase
 {
     use RefreshDatabase;

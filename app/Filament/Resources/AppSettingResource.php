@@ -11,7 +11,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 
 // Réglages clé/valeur pour ce qui ne mérite pas sa propre table — pour
-// commencer, le numéro de support (`support_screen.dart:_supportPhoneNumber`).
+// commencer, le numéro de support (bouton d'appel de `profile_screen.dart`
+// côté app, `_fallbackSupportPhoneNumber` en repli si la ligne n'existe pas
+// encore ici).
 class AppSettingResource extends Resource
 {
     protected static ?string $model = AppSetting::class;

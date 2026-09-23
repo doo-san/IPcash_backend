@@ -10,9 +10,13 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 
-// Remplace les questions/réponses codées en dur dans les fichiers ARB —
-// le support doit pouvoir corriger une réponse (ex. le montant d'un
-// plafond) sans passer par une release mobile.
+// Base de connaissance du chatbot support IA (voir
+// AiSupportChatService::systemPrompt, qui injecte ces entrées dans le
+// prompt système de Claude) — le support doit pouvoir corriger une
+// réponse (ex. le montant d'un plafond) sans passer par une release
+// mobile ni redéployer le backend. N'est plus affichée telle quelle
+// comme liste FAQ côté app (retirée du client, voir `SupportConfig` côté
+// Flutter) — reste consommée uniquement via le chat.
 class FaqEntryResource extends Resource
 {
     protected static ?string $model = FaqEntry::class;

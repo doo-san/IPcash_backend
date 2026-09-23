@@ -1,28 +1,28 @@
 <x-site-layout :title="site_setting('seo_home_title')" :description="site_setting('seo_home_description')">
 
-    <section class="hero-centered" style="padding-bottom:48px;">
+    <section class="hero" style="position:relative;overflow:hidden;padding:56px 0 40px;">
+        <div style="content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%, rgba(62,220,180,0.22), transparent 55%), radial-gradient(circle at 80% 0%, rgba(58,76,242,0.16), transparent 50%);z-index:-1;pointer-events:none;"></div>
         <div class="wrap">
-            <p class="pill reveal" style="margin:0 auto 24px;"><span class="dot"></span> Néobanque pour le Sénégal &amp; l'UEMOA</p>
-            <h1 class="reveal">Votre argent,<br><span class="grad-text">enfin simple.</span></h1>
-            <p class="lede reveal">{{ site_content('home', 'hero_subtitle') }}</p>
-            <x-store-badges class="center reveal" />
-        </div>
-
-        <div class="preview-stage reveal-scale">
-            <div class="preview-glow"></div>
-            <div class="preview-phone">
-                <div class="screen">
-                    <img src="{{ site_setting_image_url('hero_screenshot') }}" alt="Tableau de bord IPCash">
+            <div style="display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:center;" class="hero-grid">
+                <div class="reveal">
+                    <h1 style="font-size:58px;line-height:1.08;margin:0 0 22px;">Votre argent,<br><span style="background:linear-gradient(90deg,var(--hero-start),var(--hero-end));-webkit-background-clip:text;background-clip:text;color:transparent;">enfin simple.</span></h1>
+                    <p style="font-size:19px;color:var(--slate);max-width:480px;margin:0 0 36px;font-family:var(--sans);">
+                        {{ site_content('home', 'hero_subtitle') }}
+                    </p>
+                    <x-store-badges />
+                </div>
+                <div class="reveal-scale" style="display:flex;justify-content:center;position:relative;">
+                    <div style="width:280px;border-radius:42px;background:var(--ink);padding:12px;box-shadow:0 40px 80px -30px rgba(14,26,22,0.45),0 10px 24px -12px rgba(14,26,22,0.25);transform:rotate(2deg);">
+                        <img src="{{ site_setting_image_url('hero_screenshot') }}" alt="Tableau de bord IPCash" style="display:block;width:100%;border-radius:32px;">
+                    </div>
                 </div>
             </div>
-            <div class="preview-toast t1"><span>✅</span> Transfert envoyé</div>
-            <div class="preview-toast t2"><span>💱</span> IPchange · EUR → XOF</div>
-            <div class="preview-toast t3"><span>🔒</span> Paiement sécurisé</div>
         </div>
     </section>
+    <style>@media (max-width: 920px) { .hero-grid { grid-template-columns: 1fr !important; } }
+    @media (max-width: 640px) { .hero h1 { font-size: 36px !important; } }</style>
 
-    <div class="wrap reveal partner-strip" style="padding-top:12px;padding-bottom:8px;">
-        <p style="text-align:center;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--slate-light);margin:0 0 24px;">Compatible avec</p>
+    <div class="wrap reveal partner-strip" style="padding-top:40px;padding-bottom:8px;">
         <div style="display:flex;align-items:center;justify-content:center;gap:56px;flex-wrap:wrap;opacity:0.85;">
             <img src="{{ site_setting_image_url('partner_orange_money') }}" alt="Orange Money" style="height:46px;width:auto;">
             <img src="{{ site_setting_image_url('partner_wave') }}" alt="Wave" style="height:42px;width:auto;">

@@ -1,28 +1,44 @@
 <x-site-layout :title="site_setting('seo_home_title')" :description="site_setting('seo_home_description')">
 
-    <section class="hero" style="position:relative;overflow:hidden;padding:56px 0 40px;">
-        <div style="content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%, rgba(62,220,180,0.22), transparent 55%), radial-gradient(circle at 80% 0%, rgba(58,76,242,0.16), transparent 50%);z-index:-1;pointer-events:none;"></div>
-        <div class="wrap">
-            <div style="display:grid;grid-template-columns:1.05fr 0.95fr;gap:40px;align-items:center;" class="hero-grid">
-                <div class="reveal">
-                    <h1 style="font-size:58px;line-height:1.08;margin:0 0 22px;">Votre argent,<br><span style="background:linear-gradient(90deg,var(--hero-start),var(--hero-end));-webkit-background-clip:text;background-clip:text;color:transparent;">enfin simple.</span></h1>
-                    <p style="font-size:19px;color:var(--slate);max-width:480px;margin:0 0 36px;font-family:var(--sans);">
-                        {{ site_content('home', 'hero_subtitle') }}
-                    </p>
-                    <x-store-badges />
-                </div>
-                <div class="reveal-scale" style="display:flex;justify-content:center;position:relative;">
-                    <div style="width:280px;border-radius:42px;background:var(--ink);padding:12px;box-shadow:0 40px 80px -30px rgba(14,26,22,0.45),0 10px 24px -12px rgba(14,26,22,0.25);transform:rotate(2deg);">
-                        <img src="{{ site_setting_image_url('hero_screenshot') }}" alt="Tableau de bord IPCash" style="display:block;width:100%;border-radius:32px;">
-                    </div>
-                </div>
+    @php
+        $icons = [
+            'swap' => '<path d="M7 7h11l-3-3M18 7l-3 3"/><path d="M17 17H6l3 3M6 17l3-3"/>',
+            'phone' => '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+            'exchange' => '<path d="M4 12a8 8 0 0 1 14-5l2 2"/><path d="M20 5v4h-4"/><path d="M20 12a8 8 0 0 1-14 5l-2-2"/><path d="M4 19v-4h4"/>',
+            'card' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/>',
+            'wallet' => '<path d="M3 8a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z"/><path d="M16 13h2"/><path d="M3 8V6a2 2 0 0 1 2-2h9"/>',
+            'qr' => '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3m4 0h.01M14 18h7m-7 3h3m4-3v3"/>',
+            'signal' => '<path d="M4 18h.01M9 18v-4M14 18v-8M19 18V6"/>',
+            'shield' => '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/>',
+        ];
+        $iconSvg = fn (string $key, int $size = 22) => '<svg width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'.$icons[$key].'</svg>';
+    @endphp
+
+    {{-- Hero sobre : titre centré, un seul CTA, grande capture d'écran — pas de mesh coloré ni de gadget flottant --}}
+    <section style="padding:76px 0 0;">
+        <div class="wrap reveal" style="max-width:700px;margin:0 auto;text-align:center;">
+            <h1 style="font-size:50px;line-height:1.12;margin:0 0 20px;">Votre argent,<br><span class="grad-text">enfin simple.</span></h1>
+            <p style="font-size:18px;color:var(--slate);margin:0 0 32px;font-family:var(--sans);">
+                {{ site_content('home', 'hero_subtitle') }}
+            </p>
+            <x-store-badges class="center" />
+        </div>
+        <div class="wrap reveal-scale" style="margin-top:52px;">
+            <div style="max-width:300px;margin:0 auto;border-radius:36px;overflow:hidden;border:1px solid var(--line);box-shadow:0 30px 70px -30px rgba(14,26,22,0.35);">
+                <img src="{{ site_setting_image_url('hero_screenshot') }}" alt="Tableau de bord IPCash" style="display:block;width:100%;">
             </div>
         </div>
     </section>
-    <style>@media (max-width: 920px) { .hero-grid { grid-template-columns: 1fr !important; } }
-    @media (max-width: 640px) { .hero h1 { font-size: 36px !important; } }</style>
+
+    <div class="wrap reveal" style="max-width:600px;margin:0 auto;text-align:center;padding:44px 24px 0;">
+        <p style="color:var(--slate);font-size:15px;font-weight:600;margin:0;">
+            🔒 Vos transactions sont chiffrées et protégées de bout en bout —
+            <a href="{{ route('site.security') }}" style="color:var(--green-deep);font-weight:700;text-decoration:none;">en savoir plus</a>
+        </p>
+    </div>
 
     <div class="wrap reveal partner-strip" style="padding-top:40px;padding-bottom:8px;">
+        <p style="text-align:center;font-size:12.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--slate-light);margin:0 0 24px;">Compatible avec</p>
         <div style="display:flex;align-items:center;justify-content:center;gap:56px;flex-wrap:wrap;opacity:0.85;">
             <img src="{{ site_setting_image_url('partner_orange_money') }}" alt="Orange Money" style="height:46px;width:auto;">
             <img src="{{ site_setting_image_url('partner_wave') }}" alt="Wave" style="height:42px;width:auto;">
@@ -35,33 +51,47 @@
             <div class="section-head center reveal">
                 <h2>{{ site_content('home', 'features_heading') }}</h2>
             </div>
-            @php
-                $icons = [
-                    'swap' => '<path d="M7 7h11l-3-3M18 7l-3 3"/><path d="M17 17H6l3 3M6 17l3-3"/>',
-                    'phone' => '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
-                    'exchange' => '<path d="M4 12a8 8 0 0 1 14-5l2 2"/><path d="M20 5v4h-4"/><path d="M20 12a8 8 0 0 1-14 5l-2-2"/><path d="M4 19v-4h4"/>',
-                    'card' => '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/>',
-                    'wallet' => '<path d="M3 8a2 2 0 0 1 2-2h13a1 1 0 0 1 1 1v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Z"/><path d="M16 13h2"/><path d="M3 8V6a2 2 0 0 1 2-2h9"/>',
-                    'qr' => '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3m4 0h.01M14 18h7m-7 3h3m4-3v3"/>',
-                    'signal' => '<path d="M4 18h.01M9 18v-4M14 18v-8M19 18V6"/>',
-                    'shield' => '<path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3Z"/><path d="M9 12l2 2 4-4"/>',
-                ];
-                $iconSvg = fn (string $key) => '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'.$icons[$key].'</svg>';
-            @endphp
-            <div class="bento">
-                <div class="card span-2 row-2 reveal">
-                    <div class="icon" style="background:var(--green);">{!! $iconSvg('swap') !!}</div>
-                    <h3>Transfert instantané</h3>
-                    <p>Envoyez de l'argent à un proche en quelques secondes, sans frais cachés — vers un contact IPCash ou par numéro de téléphone.</p>
+
+            <div class="deep-dive" id="transfert">
+                <div class="reveal">
+                    <span class="feature-tag" style="background:rgba(0,160,91,.12);color:var(--green-deep);">Transfert</span>
+                    <h3>Envoyez et recevez de l'argent en un instant</h3>
+                    <p class="desc">Choisissez un contact IPCash ou saisissez un numéro de téléphone : l'argent arrive immédiatement, confirmé par votre code PIN ou votre empreinte — sans frais entre comptes IPCash.</p>
+                    <a href="{{ route('site.features') }}#transfert" class="btn btn-ghost">
+                        Comment ça marche
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </a>
                 </div>
-                <div class="card reveal"><div class="icon" style="background:var(--hero-end);">{!! $iconSvg('phone') !!}</div><h3>Mobile money</h3><p>Déposez et retirez depuis Orange Money ou Wave.</p></div>
-                <div class="card reveal"><div class="icon" style="background:var(--sun);">{!! $iconSvg('exchange') !!}</div><h3>IPchange</h3><p>Détenez et échangez plusieurs devises au meilleur taux.</p></div>
-                <div class="card reveal"><div class="icon" style="background:var(--pink);">{!! $iconSvg('card') !!}</div><h3>Carte virtuelle</h3><p>Une carte prépayée pour payer en ligne en sécurité.</p></div>
-                <div class="card reveal"><div class="icon" style="background:var(--green);">{!! $iconSvg('wallet') !!}</div><h3>Poches d'épargne</h3><p>Mettez de côté pour vos projets, à votre rythme.</p></div>
-                <div class="card span-2 reveal"><div class="icon" style="background:var(--hero-end);">{!! $iconSvg('qr') !!}</div><h3>Factures &amp; QR</h3><p>Payez eau, électricité, Canal+ et vos achats du quotidien en scannant un simple code QR.</p></div>
-                <div class="card reveal"><div class="icon" style="background:var(--sun);">{!! $iconSvg('signal') !!}</div><h3>Crédit &amp; eSIM</h3><p>Rechargez votre forfait ou activez un eSIM voyage.</p></div>
-                <div class="card reveal"><div class="icon" style="background:var(--pink);">{!! $iconSvg('shield') !!}</div><h3>Assurance</h3><p>Souscrivez une assurance auto depuis votre compte.</p></div>
+                <div class="deep-visual grad-1 reveal-scale"><span class="big-icon-badge" style="background:var(--green);">{!! $iconSvg('swap', 44) !!}</span></div>
             </div>
+
+            <div class="compact-grid" style="margin-top:56px;">
+                <div class="compact-card reveal">
+                    <div class="icon" style="background:var(--hero-end);">{!! $iconSvg('phone', 20) !!}</div>
+                    <div><h3>Mobile money</h3><p>Déposez et retirez depuis Orange Money ou Wave.</p></div>
+                </div>
+                <div class="compact-card reveal">
+                    <div class="icon" style="background:var(--sun);">{!! $iconSvg('exchange', 20) !!}</div>
+                    <div><h3>IPchange</h3><p>Détenez et échangez plusieurs devises au meilleur taux.</p></div>
+                </div>
+                <div class="compact-card reveal">
+                    <div class="icon" style="background:var(--pink);">{!! $iconSvg('card', 20) !!}</div>
+                    <div><h3>Carte virtuelle</h3><p>Une carte prépayée pour payer en ligne en sécurité.</p></div>
+                </div>
+                <div class="compact-card reveal">
+                    <div class="icon" style="background:var(--green);">{!! $iconSvg('wallet', 20) !!}</div>
+                    <div><h3>Poches d'épargne</h3><p>Mettez de côté pour vos projets, à votre rythme.</p></div>
+                </div>
+                <div class="compact-card reveal">
+                    <div class="icon" style="background:var(--hero-end);">{!! $iconSvg('qr', 20) !!}</div>
+                    <div><h3>Factures &amp; QR</h3><p>Eau, électricité, Canal+ et paiements par simple scan.</p></div>
+                </div>
+                <div class="compact-card reveal">
+                    <div class="icon" style="background:var(--sun);">{!! $iconSvg('signal', 20) !!}</div>
+                    <div><h3>Crédit &amp; eSIM</h3><p>Rechargez votre forfait ou activez un eSIM voyage.</p></div>
+                </div>
+            </div>
+
             <p class="reveal" style="text-align:center;margin-top:44px;">
                 <a href="{{ route('site.features') }}" class="btn btn-primary">
                     Voir toutes les fonctionnalités
@@ -97,7 +127,7 @@
         </div>
     </section>
 
-    <section class="dark" style="background-image:linear-gradient(rgba(5,10,25,.3),rgba(5,10,25,.3)),url('{{ site_setting_image_url('security_background') }}');background-size:cover;background-position:center;">
+    <section>
         <div class="wrap">
             <div class="section-head center reveal">
                 <h2>{{ site_content('home', 'security_heading') }}</h2>
@@ -115,7 +145,7 @@
         </div>
     </section>
 
-    <section id="faq">
+    <section class="alt" id="faq">
         <div class="wrap">
             <div class="section-head center reveal">
                 <h2>{{ site_content('home', 'faq_heading') }}</h2>

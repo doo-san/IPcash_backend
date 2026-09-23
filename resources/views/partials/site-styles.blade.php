@@ -393,6 +393,9 @@
     .contact-form-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 36px; box-shadow: 0 24px 48px -30px rgba(14,26,22,0.18); }
     @media (max-width: 640px) { .contact-panel, .contact-form-card { padding: 28px; } }
 
+    /* ---------- Gradient text ---------- */
+    .grad-text { background: linear-gradient(90deg, var(--hero-start), var(--hero-end)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
     /* ---------- Hero (centered, full-bleed mesh) ---------- */
     .hero-centered { position: relative; overflow: hidden; padding: 128px 0 96px; text-align: center; }
     .hero-centered::before {

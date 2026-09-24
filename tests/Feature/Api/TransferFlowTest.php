@@ -44,6 +44,49 @@ class TransferFlowTest extends TestCase
         $this->assertSame(10050, $quote['totalXof']);
     }
 
+    public function test_quote_accepts_the_minimum_amount_of_5_xof(): void
+    {
+        $sender = $this->verifiedAccount('+221771111111');
+        $this->verifiedAccount('+221772222222');
+
+        $this->postJson('/api/transfers/quote', [
+            'recipientPhoneNumber' => '+221772222222',
+            'amountXof' => 5,
+        ], $this->authHeader($sender))->assertOk();
+    }
+
+    public function test_quote_rejects_an_amount_below_5_xof(): void
+    {
+        $sender = $this->verifiedAccount('+221771111111');
+        $this->verifiedAccount('+221772222222');
+
+        $this->postJson('/api/transfers/quote', [
+            'recipientPhoneNumber' => '+221772222222',
+            'amountXof' => 4,
+        ], $this->authHeader($sender))->assertStatus(422);
+    }
+
+    public function test_p2p_transfer_works_from_5_xof_and_rejects_below(): void
+    {
+        $sender = $this->verifiedAccount('+221771111111');
+        $recipient = $this->verifiedAccount('+221772222222', 0);
+        $headers = $this->authHeader($sender);
+
+        $this->postJson('/api/transfers/p2p', [
+            'recipientPhoneNumber' => '+221772222222',
+            'amountXof' => 4,
+            'pin' => '123456',
+        ], $headers + ['Idempotency-Key' => (string) Str::uuid()])->assertStatus(422);
+
+        $this->postJson('/api/transfers/p2p', [
+            'recipientPhoneNumber' => '+221772222222',
+            'amountXof' => 5,
+            'pin' => '123456',
+        ], $headers + ['Idempotency-Key' => (string) Str::uuid()])->assertSuccessful();
+
+        $this->assertSame(5, $recipient->fresh()->balance_xof);
+    }
+
     public function test_p2p_transfer_moves_balance_and_creates_both_ledger_entries(): void
     {
         FeeRule::create(['scope' => 'p2pTransfer', 'type' => 'percent', 'value' => 50]);

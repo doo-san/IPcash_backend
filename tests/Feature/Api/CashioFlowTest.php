@@ -8,6 +8,7 @@ use App\Models\FeeRule;
 use App\Models\MobileMoneyProvider;
 use App\Models\PromoCode;
 use App\Models\Transaction;
+use App\Services\OrangeMoney\OrangeMoneyWebhookToken;
 use App\Services\Wave\WaveSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -95,6 +96,14 @@ class CashioFlowTest extends TestCase
         $this->assertSame('https://om-pay.com/checkout/123', $response['paymentUrl']);
         // Pas crédité tant que le webhook n'a pas confirmé (règle 3).
         $this->assertSame(0, $account->fresh()->balance_xof);
+
+        // L'URL de rappel remise à Orange porte le jeton lié à cette référence.
+        $reference = $account->transactions()->firstOrFail()->reference;
+        Http::assertSent(fn ($request) => str_contains($request->url(), '/v1/onlinePayment/prepare')
+            && str_ends_with(
+                $request['urls']['callbackUrl'],
+                '/api/webhooks/orange-money/'.OrangeMoneyWebhookToken::for($reference),
+            ));
     }
 
     public function test_cashin_via_orange_money_records_a_failed_transaction_when_the_provider_errors(): void
@@ -123,7 +132,7 @@ class CashioFlowTest extends TestCase
             'reference' => 'CASHIN-TESTREF01',
         ]);
 
-        $this->postJson('/api/webhooks/orange-money', [
+        $this->postJson($this->orangeWebhookUrl('CASHIN-TESTREF01'), [
             'reference' => 'CASHIN-TESTREF01', 'status' => 'SUCCESS',
         ])->assertOk();
 
@@ -139,7 +148,7 @@ class CashioFlowTest extends TestCase
             'reference' => 'CASHIN-TESTREF02',
         ]);
 
-        $this->postJson('/api/webhooks/orange-money', [
+        $this->postJson($this->orangeWebhookUrl('CASHIN-TESTREF02'), [
             'reference' => 'CASHIN-TESTREF02', 'status' => 'FAILED',
         ])->assertOk();
 
@@ -149,11 +158,60 @@ class CashioFlowTest extends TestCase
 
     public function test_orange_money_webhook_ignores_unknown_reference(): void
     {
-        $this->postJson('/api/webhooks/orange-money', [
+        $this->postJson($this->orangeWebhookUrl('CASHIN-DOESNOTEXIST'), [
             'reference' => 'CASHIN-DOESNOTEXIST', 'status' => 'SUCCESS',
         ])->assertOk();
 
         $this->assertSame(0, Transaction::count());
+    }
+
+    private function orangeWebhookUrl(string $reference): string
+    {
+        return '/api/webhooks/orange-money/'.OrangeMoneyWebhookToken::for($reference);
+    }
+
+    public function test_orange_money_webhook_rejects_a_call_without_the_right_token(): void
+    {
+        $account = $this->account('+221771111111', 0);
+        $transaction = $account->transactions()->create([
+            'type' => 'cashIn', 'status' => 'pending', 'amount_xof' => 5000,
+            'reference' => 'CASHIN-FORGED01',
+        ]);
+
+        // Jeton inventé.
+        $this->postJson('/api/webhooks/orange-money/not-the-token', [
+            'reference' => 'CASHIN-FORGED01', 'status' => 'SUCCESS',
+        ])->assertStatus(403)->assertJson(['code' => 'INVALID_WEBHOOK_TOKEN']);
+
+        // Jeton valide, mais d'une autre référence.
+        $this->postJson($this->orangeWebhookUrl('CASHIN-OTHER'), [
+            'reference' => 'CASHIN-FORGED01', 'status' => 'SUCCESS',
+        ])->assertStatus(403);
+
+        // Ancienne URL sans jeton : n'existe plus.
+        $this->postJson('/api/webhooks/orange-money', [
+            'reference' => 'CASHIN-FORGED01', 'status' => 'SUCCESS',
+        ])->assertStatus(404);
+
+        $this->assertSame('pending', $transaction->fresh()->status->value);
+        $this->assertSame(0, $account->fresh()->balance_xof);
+    }
+
+    public function test_orange_money_webhook_cannot_credit_the_same_cashin_twice(): void
+    {
+        $account = $this->account('+221771111111', 0);
+        $account->transactions()->create([
+            'type' => 'cashIn', 'status' => 'pending', 'amount_xof' => 5000,
+            'reference' => 'CASHIN-TWICE01',
+        ]);
+
+        foreach ([1, 2] as $_) {
+            $this->postJson($this->orangeWebhookUrl('CASHIN-TWICE01'), [
+                'reference' => 'CASHIN-TWICE01', 'status' => 'SUCCESS',
+            ])->assertOk();
+        }
+
+        $this->assertSame(5000, $account->fresh()->balance_xof);
     }
 
     private function waveProvider(): MobileMoneyProvider

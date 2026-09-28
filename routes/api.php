@@ -170,7 +170,11 @@ Route::middleware(['auth:sanctum', 'account.notBlocked', 'maintenance'])->group(
 // Appelé serveur-à-serveur par Orange (OM Pay), jamais par l'app — pas de
 // token bearer disponible pour cet appel, doit rester hors du groupe
 // `auth:sanctum` ci-dessus.
-Route::post('webhooks/orange-money', [OrangeMoneyWebhookController::class, 'handle'])
+// Le segment `{token}` est un HMAC lié à la référence du paiement (voir
+// OrangeMoneyWebhookToken) : Orange n'envoie ni signature ni jeton documentés,
+// donc c'est l'URL de rappel elle-même qui authentifie l'appel.
+Route::post('webhooks/orange-money/{token}', [OrangeMoneyWebhookController::class, 'handle'])
+    ->middleware('throttle:120,1')
     ->name('orange-money.webhook');
 
 // Idem pour Wave — sa signature (`Wave-Signature`) est vérifiée dans le

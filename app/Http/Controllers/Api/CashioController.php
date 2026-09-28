@@ -17,6 +17,7 @@ use App\Models\MobileMoneyProvider;
 use App\Models\PromoCode;
 use App\Models\Transaction;
 use App\Services\OrangeMoney\OrangeMoneyClient;
+use App\Services\OrangeMoney\OrangeMoneyWebhookToken;
 use App\Services\Wave\WaveClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -99,7 +100,7 @@ class CashioController extends Controller
                             reference: $reference,
                             successUrl: $this->publicUrl('/orange-money/return?status=success'),
                             cancelUrl: $this->publicUrl('/orange-money/return?status=cancel'),
-                            callbackUrl: $this->publicUrl('/api/webhooks/orange-money'),
+                            callbackUrl: $this->publicUrl('/api/webhooks/orange-money/'.OrangeMoneyWebhookToken::for($reference)),
                         ),
                         'providerReference' => null,
                     ],

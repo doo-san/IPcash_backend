@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
+use App\Services\OrangeMoney\OrangeMoneyWebhookToken;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 // Reçoit la notification asynchrone d'OM Pay (callbackUrl passée à
-// `OrangeMoneyClient::preparePayment`). Le format exact du payload n'est
+// `OrangeMoneyClient::preparePayment`, qui porte un jeton lié à la référence,
+// voir OrangeMoneyWebhookToken : sans lui, l'appel est refusé). Le format
+// exact du payload n'est
 // pas documenté dans le Swagger fourni (seul `/v1/onlinePayment/prepare`
 // y figure) — on logue toujours le corps brut pour ajuster l'extraction
 // dès le premier vrai appel reçu, et on ne fait jamais évoluer une
@@ -17,16 +20,20 @@ use Illuminate\Support\Facades\Log;
 // (CLAUDE.md règle 3 : en cas de doute, elle reste `pending`).
 class OrangeMoneyWebhookController extends Controller
 {
-    public function handle(Request $request): JsonResponse
+    public function handle(Request $request, string $token): JsonResponse
     {
+        $reference = $request->input('reference') ?? $request->input('order_id') ?? $request->input('orderId');
+
+        if (! is_string($reference) || ! OrangeMoneyWebhookToken::isValid($reference, $token)) {
+            // Corps volontairement non journalisé : il vient d'un appelant non authentifié.
+            Log::warning('[orange-money] webhook refusé : jeton invalide', ['ip' => $request->ip()]);
+
+            return response()->json(['code' => 'INVALID_WEBHOOK_TOKEN', 'message' => 'Appel non autorisé.'], 403);
+        }
+
         Log::info('[orange-money] webhook reçu', $request->all());
 
-        $reference = $request->input('reference') ?? $request->input('order_id') ?? $request->input('orderId');
         $status = $request->input('status') ?? $request->input('txnstatus');
-
-        if (! is_string($reference)) {
-            return response()->json(['received' => true]);
-        }
 
         $transaction = Transaction::where('reference', $reference)->first();
         if (! $transaction || $transaction->status->value !== 'pending') {

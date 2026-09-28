@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsAdminActivity;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 class SiteContent extends Model
 {
     use HasUuids;
+    use LogsAdminActivity;
 
     protected $fillable = ['page', 'key', 'value'];
 }

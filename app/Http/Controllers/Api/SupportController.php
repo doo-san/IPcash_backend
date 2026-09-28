@@ -8,10 +8,10 @@ use App\Http\Requests\Support\ChatMessageRequest;
 use App\Http\Resources\ChatMessageResource;
 use App\Http\Resources\FaqEntryResource;
 use App\Models\Account;
-use App\Models\AppSetting;
 use App\Models\ChatbotAnswer;
 use App\Models\FaqEntry;
 use App\Services\AiSupportChatService;
+use App\Support\AppConfig;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -46,7 +46,7 @@ class SupportController extends Controller
             ->get();
 
         return response()->json([
-            'supportPhoneNumber' => AppSetting::get('support_phone_number', '+221338000000'),
+            'supportPhoneNumber' => AppConfig::string('support_phone_number'),
             'faq' => FaqEntryResource::collection($faq)->resolve(),
         ]);
     }

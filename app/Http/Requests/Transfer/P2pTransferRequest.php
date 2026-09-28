@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Transfer;
 
+use App\Support\AppConfig;
 use Illuminate\Foundation\Http\FormRequest;
 
 class P2pTransferRequest extends FormRequest
@@ -18,7 +19,7 @@ class P2pTransferRequest extends FormRequest
     {
         return [
             'recipientPhoneNumber' => ['required', 'string'],
-            'amountXof' => ['required', 'integer', 'min:'.QuoteRequest::MIN_AMOUNT_XOF],
+            'amountXof' => ['required', 'integer', 'min:'.AppConfig::int('transfer_min_amount_xof')],
             'note' => ['nullable', 'string', 'max:140'],
             'pin' => ['required', 'string', 'regex:/^[0-9]{6}$/'],
         ];

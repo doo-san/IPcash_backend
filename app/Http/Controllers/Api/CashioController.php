@@ -63,6 +63,9 @@ class CashioController extends Controller
         $data = $request->validated();
         $idempotencyKey = $request->header('Idempotency-Key');
         $amountXof = (int) $data['amountXof'];
+        if ($violation = $this->providerLimitViolation($data['providerId'], $amountXof)) {
+            return $violation;
+        }
         $feeXof = FeeRule::computeFor(FeeScope::CashIn, $amountXof);
 
         $promo = $this->resolvePromoCode($data['promoCode'] ?? null, $feeXof);
@@ -231,6 +234,31 @@ class CashioController extends Controller
         return rtrim((string) config('app.url'), '/').$path;
     }
 
+    // Applique les montants min/max saisis par l'admin sur la fiche de
+    // l'opérateur (MobileMoneyProviderResource) : sans ça, ces champs
+    // seraient purement décoratifs. Opérateur inconnu : pas de plafond.
+    private function providerLimitViolation(string $providerId, int $amountXof): ?JsonResponse
+    {
+        $provider = MobileMoneyProvider::find($providerId);
+        if ($provider === null) {
+            return null;
+        }
+
+        if ($amountXof < $provider->min_amount_xof || $amountXof > $provider->max_amount_xof) {
+            return response()->json([
+                'code' => 'AMOUNT_OUT_OF_RANGE',
+                'message' => sprintf(
+                    'Le montant doit être compris entre %s et %s F pour %s.',
+                    number_format($provider->min_amount_xof, 0, ',', ' '),
+                    number_format($provider->max_amount_xof, 0, ',', ' '),
+                    $provider->name,
+                ),
+            ], 422);
+        }
+
+        return null;
+    }
+
     public function cashout(CashoutRequest $request): JsonResponse
     {
         /** @var Account $account */
@@ -238,6 +266,9 @@ class CashioController extends Controller
         $data = $request->validated();
         $idempotencyKey = $request->header('Idempotency-Key');
         $amountXof = (int) $data['amountXof'];
+        if ($violation = $this->providerLimitViolation($data['providerId'], $amountXof)) {
+            return $violation;
+        }
         $feeXof = FeeRule::computeFor(FeeScope::CashOut, $amountXof);
 
         if ($account->pin_hash === null || ! Hash::check($data['pin'], $account->pin_hash)) {

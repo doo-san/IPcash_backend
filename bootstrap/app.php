@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Middleware\EnsureAccountIsNotBlocked;
+use App\Http\Middleware\EnsureFeatureEnabled;
 use App\Http\Middleware\EnsureIdempotencyKey;
+use App\Http\Middleware\EnsureNotInMaintenance;
 use App\Http\Middleware\EnsureValidSessionToken;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
@@ -26,6 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'session.token' => EnsureValidSessionToken::class,
             'idempotency' => EnsureIdempotencyKey::class,
             'account.notBlocked' => EnsureAccountIsNotBlocked::class,
+            'feature' => EnsureFeatureEnabled::class,
+            'maintenance' => EnsureNotInMaintenance::class,
         ]);
 
         // Aucune route nommée `login` n'existe (seule

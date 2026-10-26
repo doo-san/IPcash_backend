@@ -89,10 +89,9 @@ class CashioController extends Controller
         }
 
         // Orange Money et Wave sont les seuls opérateurs mobile money
-        // réellement branchés (OrangeMoneyClient/OM Pay, WaveClient) —
-        // Mixx by Yas reste sur la simulation interne ci-dessous tant qu'il
-        // ne l'est pas aussi (CLAUDE.md règle 9 : purement interne au solde
-        // IPCash, peut simuler une réussite réaliste).
+        // réellement branchés en dépôt (OrangeMoneyClient/OM Pay, WaveClient).
+        // Tout autre cas n'est simulé qu'en développement (voir
+        // simulationAllowed()) ; sinon « intégration en attente ».
         $provider = MobileMoneyProvider::find($data['providerId']);
         if ($provider?->isConfigured()) {
             if ($provider->isOrangeMoney()) {
@@ -130,6 +129,10 @@ class CashioController extends Controller
             }
         }
 
+        if (! $this->simulationAllowed()) {
+            return $this->refuseUnintegratedProvider($account, TransactionType::CashIn, $creditedXof, $idempotencyKey, 'CASHIN');
+        }
+
         $transaction = DB::transaction(function () use ($account, $creditedXof, $feeXof, $promoCode, $idempotencyKey) {
             $account->increment('balance_xof', $creditedXof);
             $promoCode?->increment('redemptions_count');
@@ -145,6 +148,21 @@ class CashioController extends Controller
         });
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
+    }
+
+    // Simulation d'un dépôt/retrait par un opérateur non branché :
+    // uniquement si MOBILE_MONEY_SIMULATION est activé (dev local, tests),
+    // et jamais en production — elle créditerait de l'argent sans paiement.
+    private function simulationAllowed(): bool
+    {
+        return ! app()->isProduction() && (bool) config('services.mobile_money.simulate_unintegrated');
+    }
+
+    private function refuseUnintegratedProvider(Account $account, TransactionType $type, int $amountXof, ?string $idempotencyKey, string $prefix): JsonResponse
+    {
+        $this->recordPendingIntegrationAttempt($account, $type, $amountXof, $idempotencyKey, $prefix);
+
+        return $this->integrationPending();
     }
 
     // Dépôt via un prestataire à redirection web réellement branché (OM
@@ -296,18 +314,23 @@ class CashioController extends Controller
         }
 
         // Wave est le seul opérateur mobile money avec un retrait réellement
-        // branché (WaveClient::sendPayout) — Orange Money (dépôt seulement
-        // pour l'instant) et Mixx by Yas restent sur la simulation interne.
-        // Note : le solde n'est débité pour Wave qu'à la confirmation du
-        // paiement (voir applyWavePayoutStatus), qui relit déjà le solde
-        // sous verrou — ce contrôle-ci ne sert pour Wave qu'à rejeter tout
-        // de suite une tentative manifestement vouée à l'échec.
+        // branché (WaveClient::sendPayout). Tout autre cas n'est simulé
+        // qu'en développement (voir simulationAllowed()) ; sinon
+        // « intégration en attente » — jamais un débit sans paiement réel.
+        $provider = MobileMoneyProvider::find($data['providerId']);
+        $viaWave = $provider?->isWave() && $provider->isConfigured();
+        if (! $viaWave && ! $this->simulationAllowed()) {
+            return $this->refuseUnintegratedProvider($account, TransactionType::CashOut, -$totalXof, $idempotencyKey, 'CASHOUT');
+        }
+
+        // Pour Wave, le solde n'est débité qu'à la confirmation du paiement
+        // (applyWavePayoutStatus, sous verrou) : ce contrôle rejette
+        // seulement tout de suite une tentative vouée à l'échec.
         if ($account->balance_xof < $totalXof) {
             return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde insuffisant pour effectuer cette opération.'], 402);
         }
 
-        $provider = MobileMoneyProvider::find($data['providerId']);
-        if ($provider?->isWave() && $provider->isConfigured()) {
+        if ($viaWave) {
             return $this->cashoutViaWave($account, $provider, $amountXof, $feeXof, $totalXof, $promoCode, $idempotencyKey);
         }
 

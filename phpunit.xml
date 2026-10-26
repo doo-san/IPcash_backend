@@ -22,6 +22,7 @@
         <ini name="memory_limit" value="512M"/>
         <env name="APP_ENV" value="testing"/>
         <env name="SENTRY_LARAVEL_DSN" value="" force="true"/>
+        <env name="MOBILE_MONEY_SIMULATION" value="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>

@@ -40,6 +40,69 @@ class CashioFlowTest extends TestCase
         );
     }
 
+    private function mixxProvider(): MobileMoneyProvider
+    {
+        return MobileMoneyProvider::create([
+            'name' => 'Mixx by Yas', 'min_amount_xof' => 100, 'max_amount_xof' => 1000000,
+            'flow' => 'ussd', 'country_dial_code' => '+221', 'currency_code' => 'XOF',
+        ]);
+    }
+
+    public function test_without_simulation_a_deposit_through_an_unconnected_operator_credits_nothing(): void
+    {
+        config(['services.mobile_money.simulate_unintegrated' => false]);
+        $provider = $this->mixxProvider();
+        $account = $this->account('+221771111111', 0);
+
+        $this->postJson('/api/cashin', [
+            'providerId' => $provider->id, 'sourcePhoneNumber' => '+221771111111', 'amountXof' => 5000,
+        ], $this->authHeader($account))->assertStatus(400)->assertJson(['code' => 'INTEGRATION_PENDING']);
+
+        $this->assertSame(0, $account->fresh()->balance_xof);
+        $this->assertSame('failed', Transaction::first()->status->value);
+    }
+
+    public function test_without_simulation_a_withdrawal_through_a_deposit_only_operator_debits_nothing(): void
+    {
+        config(['services.mobile_money.simulate_unintegrated' => false]);
+        $provider = $this->orangeMoneyProvider();
+        $account = $this->account('+221771111111', 10000);
+
+        $this->postJson('/api/cashout', [
+            'providerId' => $provider->id, 'amountXof' => 4000, 'pin' => '123456',
+        ], $this->authHeader($account))->assertStatus(400)->assertJson(['code' => 'INTEGRATION_PENDING']);
+
+        $this->assertSame(10000, $account->fresh()->balance_xof);
+    }
+
+    public function test_production_never_simulates_even_if_the_flag_is_on(): void
+    {
+        config(['services.mobile_money.simulate_unintegrated' => true]);
+        $this->app['env'] = 'production';
+        $provider = $this->mixxProvider();
+        $account = $this->account('+221771111111', 0);
+
+        $this->postJson('/api/cashin', [
+            'providerId' => $provider->id, 'sourcePhoneNumber' => '+221771111111', 'amountXof' => 5000,
+        ], $this->authHeader($account))->assertStatus(400);
+
+        $this->assertSame(0, $account->fresh()->balance_xof);
+    }
+
+    public function test_a_connected_wave_withdrawal_still_works_without_simulation(): void
+    {
+        config(['services.mobile_money.simulate_unintegrated' => false]);
+        Http::fake(['api.wave.com/v1/payout' => Http::response(['id' => 'pt-7', 'status' => 'succeeded'])]);
+        $provider = $this->waveProvider();
+        $account = $this->account('+221771111111', 10000);
+
+        $this->postJson('/api/cashout', [
+            'providerId' => $provider->id, 'amountXof' => 4000, 'pin' => '123456',
+        ], $this->authHeader($account))->assertStatus(202)->assertJson(['status' => 'completed']);
+
+        $this->assertSame(6000, $account->fresh()->balance_xof);
+    }
+
     public function test_cashin_credits_balance(): void
     {
         $account = $this->account('+221771111111', 0);

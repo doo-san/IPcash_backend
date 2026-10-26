@@ -14,6 +14,12 @@ return [
     |
     */
 
+    'mobile_money' => [
+        // Dépôt/retrait simulé pour un opérateur non branché (dev local,
+        // tests). Ignoré en production — voir CashioController.
+        'simulate_unintegrated' => (bool) env('MOBILE_MONEY_SIMULATION', false),
+    ],
+
     'anthropic' => [
         // Chatbot support (SupportController::chat) — voir
         // AiSupportChatService. Clé absente ou invalide = repli automatique

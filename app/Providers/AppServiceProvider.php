@@ -2,7 +2,10 @@
 
 namespace App\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,5 +30,22 @@ class AppServiceProvider extends ServiceProvider
         // parsing JSON côté Flutter sur chaque endpoint qui renvoie une
         // Resource.
         JsonResource::withoutWrapping();
+
+        // Limite globale de l'API, par compte quand un jeton est présenté
+        // (garde `sanctum` explicite : ce limiteur peut passer avant
+        // `auth:sanctum`), sinon par IP.
+        RateLimiter::for('api', fn (Request $request) => Limit::perMinute(120)
+            ->by(self::clientKey($request)));
+
+        // Chaque message déclenche un appel Anthropic facturé.
+        RateLimiter::for('support-chat', fn (Request $request) => Limit::perMinute(10)
+            ->by(self::clientKey($request)));
+    }
+
+    private static function clientKey(Request $request): string
+    {
+        $account = $request->user('sanctum');
+
+        return $account ? "account:{$account->getKey()}" : "ip:{$request->ip()}";
     }
 }

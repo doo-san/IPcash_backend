@@ -30,11 +30,14 @@ class AiSupportChatService
 
     private ?Client $client;
 
-    public function __construct(?Client $client = null)
+    private AiSupportBudget $budget;
+
+    public function __construct(?Client $client = null, ?AiSupportBudget $budget = null)
     {
         $apiKey = config('services.anthropic.key');
 
         $this->client = $client ?? ($apiKey ? new Client(apiKey: $apiKey) : null);
+        $this->budget = $budget ?? new AiSupportBudget;
     }
 
     public function isAvailable(): bool
@@ -49,6 +52,12 @@ class AiSupportChatService
     public function reply(Account $account, string $latestMessage): ?string
     {
         if ($this->client === null) {
+            return null;
+        }
+
+        if (! $this->budget->tryConsume($account)) {
+            Log::notice('AiSupportChatService: plafond quotidien atteint, repli mot-clé');
+
             return null;
         }
 

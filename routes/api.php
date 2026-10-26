@@ -177,7 +177,8 @@ Route::middleware(['auth:sanctum', 'account.notBlocked', 'maintenance'])->group(
     });
 
     Route::get('support/config', [SupportController::class, 'config']);
-    Route::post('support/chat', [SupportController::class, 'chat']);
+    Route::post('support/chat', [SupportController::class, 'chat'])
+        ->middleware('throttle:support-chat');
 });
 
 // Appelé serveur-à-serveur par Orange (OM Pay), jamais par l'app — pas de
@@ -186,7 +187,11 @@ Route::middleware(['auth:sanctum', 'account.notBlocked', 'maintenance'])->group(
 // Le segment `{token}` est un HMAC lié à la référence du paiement (voir
 // OrangeMoneyWebhookToken) : Orange n'envoie ni signature ni jeton documentés,
 // donc c'est l'URL de rappel elle-même qui authentifie l'appel.
+// Les webhooks gardent leur propre limite et sont exclus du limiteur `api`
+// (par IP) : un pic de rappels du prestataire ne doit jamais faire rater
+// une confirmation de paiement.
 Route::post('webhooks/orange-money/{token}', [OrangeMoneyWebhookController::class, 'handle'])
+    ->withoutMiddleware('throttle:api')
     ->middleware('throttle:120,1')
     ->name('orange-money.webhook');
 
@@ -194,4 +199,6 @@ Route::post('webhooks/orange-money/{token}', [OrangeMoneyWebhookController::clas
 // contrôleur lui-même plutôt que via un middleware, faute d'un moyen
 // standard de lire le corps brut avant que Laravel ne le parse ailleurs.
 Route::post('webhooks/wave', [WaveWebhookController::class, 'handle'])
+    ->withoutMiddleware('throttle:api')
+    ->middleware('throttle:300,1')
     ->name('wave.webhook');

@@ -32,6 +32,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'maintenance' => EnsureNotInMaintenance::class,
         ]);
 
+        // Limiteur `api` défini dans AppServiceProvider (120/min par compte
+        // ou par IP) ; les webhooks en sont exclus dans routes/api.php.
+        $middleware->throttleApi();
+
         // Aucune route nommée `login` n'existe (seule
         // `filament.admin.auth.login` existe, gérée par son propre panel) —
         // sans ça, un appel API sans jeton valide plante en 500

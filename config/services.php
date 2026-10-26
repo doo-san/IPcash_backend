@@ -20,6 +20,9 @@ return [
         // sur l'ancien système mot-clé (ChatbotAnswerResource), jamais
         // d'erreur exposée au client.
         'key' => env('ANTHROPIC_API_KEY'),
+        // Au-delà, repli sur les réponses par mot-clé (voir AiSupportBudget).
+        'daily_limit_per_account' => (int) env('ANTHROPIC_DAILY_LIMIT_PER_ACCOUNT', 30),
+        'daily_limit_global' => (int) env('ANTHROPIC_DAILY_LIMIT_GLOBAL', 500),
     ],
 
     'postmark' => [

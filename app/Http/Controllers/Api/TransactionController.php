@@ -19,7 +19,7 @@ class TransactionController extends Controller
     {
         /** @var Account $account */
         $account = $request->user();
-        $limit = min((int) $request->query('limit', 20), 100);
+        $limit = max(1, min((int) $request->query('limit', 20), 100));
 
         $query = $account->transactions()->orderByDesc('id');
 

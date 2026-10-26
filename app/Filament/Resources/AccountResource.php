@@ -58,7 +58,9 @@ class AccountResource extends Resource
         return $form->schema([
             Forms\Components\TextInput::make('phone_number')
                 ->label('Téléphone')
-                ->disabled(),
+                ->formatStateUsing(fn (?Account $record) => $record?->displayPhoneNumber())
+                ->disabled()
+                ->dehydrated(false),
             Forms\Components\TextInput::make('first_name')->label('Prénom'),
             Forms\Components\TextInput::make('last_name')->label('Nom'),
             Forms\Components\TextInput::make('email')->email(),
@@ -75,7 +77,8 @@ class AccountResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('phone_number')
                     ->label('Téléphone')
-                    ->searchable(),
+                    ->state(fn (Account $record) => $record->displayPhoneNumber())
+                    ->searchable(['phone_number', 'closed_phone_number']),
                 Tables\Columns\TextColumn::make('full_name')
                     ->label('Nom')
                     ->state(fn (Account $record) => trim("{$record->first_name} {$record->last_name}") ?: '—')
@@ -107,12 +110,23 @@ class AccountResource extends Resource
                     })
                     ->placeholder('—')
                     ->color('danger'),
+                Tables\Columns\TextColumn::make('closed_at')
+                    ->label('Clôturé le')
+                    ->dateTime('d/m/Y')
+                    ->placeholder('—')
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Inscrit le')
                     ->dateTime('d/m/Y')
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\TernaryFilter::make('closed')
+                    ->label('Clôturés')
+                    ->nullable()
+                    ->attribute('closed_at')
+                    ->trueLabel('Comptes clôturés')
+                    ->falseLabel('Comptes ouverts'),
                 Tables\Filters\SelectFilter::make('kyc_status')
                     ->label('Statut KYC')
                     ->options(array_combine(
@@ -141,7 +155,13 @@ class AccountResource extends Resource
             Section::make('Compte')
                 ->columns(3)
                 ->schema([
-                    TextEntry::make('phone_number')->label('Téléphone'),
+                    TextEntry::make('phone_number')
+                        ->label('Téléphone')
+                        ->state(fn (Account $record) => $record->displayPhoneNumber()),
+                    TextEntry::make('closed_at')
+                        ->label('Clôturé le')
+                        ->dateTime('d/m/Y H:i')
+                        ->placeholder('—'),
                     TextEntry::make('full_name')
                         ->label('Nom')
                         ->state(fn (Account $record) => trim("{$record->first_name} {$record->last_name}") ?: '—'),

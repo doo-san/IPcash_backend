@@ -51,6 +51,12 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
+        // Clôture confirmée par PIN : freine les essais de PIN en masse.
+        // (Un `throttle:5,1` numérique planterait ici : Account n'implémente
+        // pas getAuthIdentifier().)
+        RateLimiter::for('account-closure', fn (Request $request) => Limit::perMinute(5)
+            ->by(self::clientKey($request)));
+
         // Chaque message déclenche un appel Anthropic facturé.
         RateLimiter::for('support-chat', fn (Request $request) => Limit::perMinute(10)
             ->by(self::clientKey($request)));

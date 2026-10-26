@@ -4,6 +4,8 @@ namespace App\Filament\Resources\AccountResource\Widgets;
 
 use App\Filament\Resources\AccountResource;
 use App\Models\Account;
+use App\Services\Accounts\AccountClosureBlockedException;
+use App\Services\Accounts\AccountClosureService;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
@@ -139,39 +141,86 @@ class AccountActionsWidget extends Widget implements HasActions, HasForms
             });
     }
 
-    public function deleteAction(): Action
+    // Circuit normal (identique à la demande du client depuis l'app) :
+    // accès coupé, données légales conservées puis purgées à échéance.
+    public function closeAction(): Action
     {
-        return Action::make('delete')
-            ->label('Supprimer le client')
-            ->icon('heroicon-o-trash')
+        return Action::make('close')
+            ->label('Clôturer le compte')
+            ->icon('heroicon-o-archive-box-x-mark')
             ->color('danger')
+            ->visible(fn () => auth()->user()->isSuperAdmin() && ! $this->record->isClosed())
             ->requiresConfirmation()
-            ->modalHeading('Supprimer le client')
-            ->modalDescription('Cette action supprime définitivement le client et tout son historique (transactions, KYC, cartes, poches, sessions…). Irréversible.')
-            ->action(function () {
-                $hasFunds = $this->record->balance_xof !== 0
-                    || $this->record->cards()->where('balance_xof', '!=', 0)->exists()
-                    || $this->record->pockets()->where('balance_xof', '!=', 0)->exists()
-                    || $this->record->foreignBalances()->where('amount_minor_units', '!=', 0)->exists();
-
-                if ($hasFunds) {
+            ->modalHeading('Clôturer le compte')
+            ->modalDescription('Le client perd immédiatement tout accès et son numéro est libéré. Identité, pièces KYC, transactions et contrats sont conservés '.config('accounts.closed_retention_years').' ans (obligation légale) puis supprimés automatiquement.')
+            ->action(function (AccountClosureService $closure) {
+                try {
+                    $closure->close($this->record);
+                } catch (AccountClosureBlockedException $e) {
                     Notification::make()
-                        ->title('Suppression impossible')
-                        ->body('Ce client détient encore des fonds (solde principal, carte, poche ou sous-compte devise). Le solde doit revenir à zéro avant de pouvoir supprimer le compte.')
+                        ->title('Clôture impossible')
+                        ->body(self::describeBlockers($e->blockers))
                         ->danger()
                         ->send();
 
                     return;
                 }
 
-                $this->record->delete();
+                Notification::make()->title('Compte clôturé')->success()->send();
+                $this->record->refresh();
+            });
+    }
 
-                Notification::make()->title('Client supprimé')->success()->send();
+    // Réservée aux comptes de test : efface aussi les données que la
+    // réglementation impose de conserver pour un vrai client.
+    public function deleteAction(): Action
+    {
+        return Action::make('delete')
+            ->label('Supprimer définitivement')
+            ->icon('heroicon-o-trash')
+            ->color('gray')
+            ->visible(fn () => auth()->user()->isSuperAdmin())
+            ->requiresConfirmation()
+            ->modalHeading('Supprimer définitivement')
+            ->modalDescription('Réservé aux comptes de test. Efface sans retour le client, son historique, ses pièces KYC et ses attestations — données qu\'un vrai client clôturé doit conserver '.config('accounts.closed_retention_years').' ans. Pour un vrai client, utilisez « Clôturer le compte ».')
+            ->action(function (AccountClosureService $closure) {
+                $blockers = array_values(array_intersect($closure->blockers($this->record), [
+                    AccountClosureService::MAIN_BALANCE,
+                    AccountClosureService::POCKET_BALANCE,
+                    AccountClosureService::CARD_BALANCE,
+                    AccountClosureService::EPHEMERAL_CARD_BALANCE,
+                    AccountClosureService::FOREIGN_BALANCE,
+                ]));
+                if ($blockers !== []) {
+                    Notification::make()
+                        ->title('Suppression impossible')
+                        ->body(self::describeBlockers($blockers))
+                        ->danger()
+                        ->send();
 
-                // Contrairement à une action de ligne sur la liste (qui y
-                // reste), on est ici sur la fiche du client qu'on vient de
-                // supprimer — plus rien à afficher, retour à la liste.
+                    return;
+                }
+
+                $closure->purge($this->record);
+
+                Notification::make()->title('Client supprimé définitivement')->success()->send();
                 $this->redirect(AccountResource::getUrl('index'));
             });
+    }
+
+    /** @param list<string> $blockers */
+    private static function describeBlockers(array $blockers): string
+    {
+        $labels = [
+            AccountClosureService::MAIN_BALANCE => 'solde principal non nul',
+            AccountClosureService::POCKET_BALANCE => 'argent sur une poche',
+            AccountClosureService::CARD_BALANCE => 'argent sur une carte',
+            AccountClosureService::EPHEMERAL_CARD_BALANCE => 'argent sur la carte éphémère',
+            AccountClosureService::FOREIGN_BALANCE => 'argent sur un sous-compte devise',
+            AccountClosureService::PENDING_TRANSACTION => 'opération en cours',
+            AccountClosureService::PENDING_INSURANCE => 'contrat d\'assurance en attente de validation',
+        ];
+
+        return 'À régler d\'abord : '.implode(', ', array_map(fn ($b) => $labels[$b] ?? $b, $blockers)).'.';
     }
 }

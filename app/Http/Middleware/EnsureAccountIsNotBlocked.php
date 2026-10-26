@@ -18,6 +18,10 @@ class EnsureAccountIsNotBlocked
     {
         $account = $request->user();
 
+        if ($account instanceof Account && $account->isClosed()) {
+            return response()->json(['code' => 'UNAUTHORIZED', 'message' => 'Ce compte est clôturé.'], 401);
+        }
+
         if ($account instanceof Account && $account->isBlocked()) {
             return response()->json([
                 'code' => 'ACCOUNT_BLOCKED',

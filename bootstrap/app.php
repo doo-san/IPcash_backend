@@ -29,6 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $schedule->command('backup:run')->dailyAt('01:30');
         $schedule->command('backup:monitor')->dailyAt('06:00');
         $schedule->command('backup:verify-restore')->weeklyOn(0, '05:00');
+
+        // Fin de conservation légale des comptes clôturés (config/accounts.php).
+        $schedule->command('accounts:purge-closed')->dailyAt('03:30');
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([

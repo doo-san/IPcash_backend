@@ -21,9 +21,13 @@
                 {{ $this->unblockAction }}
             @endif
 
-            {{-- À côté des boutons de blocage, comme demandé — suppression
-                 volontairement dans le même groupe plutôt qu'isolée. --}}
-            {{ $this->deleteAction }}
+            @if ($this->closeAction->isVisible())
+                {{ $this->closeAction }}
+            @endif
+
+            @if ($this->deleteAction->isVisible())
+                {{ $this->deleteAction }}
+            @endif
         </div>
     </x-filament::section>
 

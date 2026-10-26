@@ -56,6 +56,7 @@ class Account extends Model
             'locked_until' => 'datetime',
             'blocked_at' => 'datetime',
             'blocked_until' => 'datetime',
+            'closed_at' => 'datetime',
             'notifications_enabled' => 'boolean',
             'biometric_enabled' => 'boolean',
         ];
@@ -139,6 +140,18 @@ class Account extends Model
     public function isBlocked(): bool
     {
         return $this->isBlockedPermanently() || $this->isBlockedTemporarily();
+    }
+
+    public function isClosed(): bool
+    {
+        return $this->closed_at !== null;
+    }
+
+    // Numéro réel, y compris après clôture (déplacé dans
+    // `closed_phone_number`, voir AccountClosureService).
+    public function displayPhoneNumber(): string
+    {
+        return $this->closed_phone_number ?? $this->phone_number;
     }
 
     // Dérivé, comme le getter `fullName` côté Flutter (`Account._()`) —

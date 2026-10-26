@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AccountClosureController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BeneficiaryController;
@@ -76,6 +77,8 @@ Route::middleware(['auth:sanctum', 'account.notBlocked', 'maintenance'])->group(
         Route::patch('/', [ProfileController::class, 'update']);
         Route::get('sessions', [ProfileController::class, 'sessions']);
         Route::delete('sessions/{id}', [ProfileController::class, 'revokeSession']);
+        Route::get('closure', [AccountClosureController::class, 'eligibility']);
+        Route::post('close', [AccountClosureController::class, 'close'])->middleware('throttle:account-closure');
     });
 
     Route::prefix('transfers')->middleware('feature:transfer')->group(function () {

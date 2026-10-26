@@ -91,6 +91,11 @@ class Account extends Model
         return $this->hasMany(ChatMessage::class);
     }
 
+    public function insurancePolicies(): HasMany
+    {
+        return $this->hasMany(InsurancePolicy::class);
+    }
+
     public function refreshTokens(): HasMany
     {
         return $this->hasMany(RefreshToken::class);

@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Exigence produit : « toute modification doit avoir une traçabilité ».
@@ -25,7 +26,7 @@ class AdminActivityLogTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create();
+        $this->admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
     }
 
     public function test_the_audit_log_page_renders(): void

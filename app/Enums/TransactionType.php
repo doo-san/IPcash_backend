@@ -21,5 +21,6 @@ enum TransactionType: string
     case ForeignExchangeOut = 'foreignExchangeOut';
     case ForeignTransferOut = 'foreignTransferOut';
     case InsurancePurchase = 'insurancePurchase';
+    case InsuranceRefund = 'insuranceRefund';
     case EsimActivation = 'esimActivation';
 }

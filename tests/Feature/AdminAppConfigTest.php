@@ -9,6 +9,7 @@ use App\Models\ContactMessage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Page "Réglages de l'application" (config/app_config.php) et widget
@@ -19,7 +20,7 @@ class AdminAppConfigTest extends TestCase
 
     public function test_the_page_renders_with_defaults(): void
     {
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
 
         $this->actingAs($admin)->get('/admin/app-config-page')->assertOk()->assertSee('Réglages de l');
 
@@ -32,7 +33,7 @@ class AdminAppConfigTest extends TestCase
 
     public function test_saving_changes_what_the_public_config_serves(): void
     {
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
 
         Livewire::actingAs($admin)
             ->test(AppConfigPage::class)
@@ -54,7 +55,7 @@ class AdminAppConfigTest extends TestCase
 
     public function test_the_minimum_transfer_amount_cannot_be_zero(): void
     {
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
 
         Livewire::actingAs($admin)
             ->test(AppConfigPage::class)
@@ -65,7 +66,7 @@ class AdminAppConfigTest extends TestCase
 
     public function test_saving_is_recorded_in_the_audit_log(): void
     {
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
 
         Livewire::actingAs($admin)
             ->test(AppConfigPage::class)
@@ -77,7 +78,7 @@ class AdminAppConfigTest extends TestCase
 
     public function test_the_dashboard_shows_the_pending_work_widget(): void
     {
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
         ContactMessage::create(['name' => 'A', 'email' => 'a@example.com', 'subject' => 'Question', 'message' => 'Bonjour']);
 
         $this->actingAs($admin)->get('/admin')->assertOk();

@@ -101,6 +101,18 @@ class PocketFlowTest extends TestCase
         $this->assertSame(6000, $pocket->fresh()->balance_xof);
     }
 
+    public function test_transfer_out_exceeding_pocket_balance_is_rejected(): void
+    {
+        $account = $this->account(0);
+        $pocket = $account->pockets()->create(['name' => 'Coffre', 'balance_xof' => 1000]);
+
+        $this->postJson("/api/pockets/{$pocket->id}/transfer-out", ['amountXof' => 5000], $this->idempotentHeader($account))
+            ->assertStatus(402);
+
+        $this->assertSame(0, $account->fresh()->balance_xof);
+        $this->assertSame(1000, $pocket->fresh()->balance_xof);
+    }
+
     public function test_transfer_out_of_a_locked_pocket_is_blocked(): void
     {
         $account = $this->account(0);

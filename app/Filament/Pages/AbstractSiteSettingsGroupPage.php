@@ -28,6 +28,13 @@ abstract class AbstractSiteSettingsGroupPage extends Page implements HasForms
     /** @var array<string, string|null> */
     public array $data = [];
 
+    // Contenu du site public : modification réservée à `super_admin`.
+    // Vérifié par Filament au montage et à chaque requête Livewire.
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->isSuperAdmin() ?? false;
+    }
+
     abstract protected function groupKey(): string;
 
     /**

@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Couvre les demandes produit : suppression d'un client (avec garde-fou
@@ -27,7 +28,7 @@ class AdminDeletionAndTrackingTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create();
+        $this->admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
     }
 
     public function test_an_account_with_zero_balance_can_be_deleted(): void

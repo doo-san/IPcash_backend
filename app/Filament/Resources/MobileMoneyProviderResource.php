@@ -112,4 +112,22 @@ class MobileMoneyProviderResource extends Resource
             'edit' => Pages\EditMobileMoneyProvider::route('/{record}/edit'),
         ];
     }
+
+    // Détient les identifiants chiffrés (`api_key`/`api_secret`) des
+    // fournisseurs mobile money : modification réservée à `super_admin` —
+    // `support` ne voit la liste qu'en lecture.
+    public static function canCreate(): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
 }

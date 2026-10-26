@@ -39,6 +39,14 @@ class AppConfigPage extends Page implements HasForms
     /** @var array<string, mixed> */
     public array $data = [];
 
+    // Maintenance, services ouverts, limites, mentions d'assurance :
+    // modification réservée à `super_admin`. Vérifié par Filament au montage
+    // et à chaque requête Livewire.
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->isSuperAdmin() ?? false;
+    }
+
     public function mount(): void
     {
         $filled = [];

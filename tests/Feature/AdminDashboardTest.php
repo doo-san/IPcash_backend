@@ -10,6 +10,7 @@ use App\Models\Merchant;
 use App\Models\MobileMoneyProvider;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Exigence produit : le tableau de bord doit contenir le nombre de
@@ -22,7 +23,7 @@ class AdminDashboardTest extends TestCase
 
     public function test_dashboard_renders_with_real_data_across_all_widgets(): void
     {
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
 
         $account = Account::create(['phone_number' => '+221770000080']);
         $account->balance_xof = 15000;
@@ -46,7 +47,7 @@ class AdminDashboardTest extends TestCase
 
     public function test_dashboard_renders_with_an_empty_database(): void
     {
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
 
         $this->actingAs($admin)->get('/admin')->assertOk();
     }

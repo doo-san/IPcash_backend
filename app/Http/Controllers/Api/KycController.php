@@ -17,10 +17,10 @@ use Illuminate\Http\Request;
 // l'admin, voir `KycDocumentResource` (actions Approuver/Rejeter).
 class KycController extends Controller
 {
-    // Stockage sur le disque "public" pour l'instant, comme documenté dans
-    // `KycDocumentResource` : à déplacer sur un disque privé avec URLs
-    // signées avant la mise en production (données KYC sensibles).
-    private const DISK = 'public';
+    // Disque privé dédié (voir `config/filesystems.php`) : fichiers servis
+    // uniquement via une URL signée temporaire générée à la demande, jamais
+    // par un chemin public direct (données KYC sensibles).
+    private const DISK = 'kyc';
 
     public function analyzeDocument(AnalyzeDocumentRequest $request): JsonResponse
     {

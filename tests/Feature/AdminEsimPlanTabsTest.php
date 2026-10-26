@@ -7,6 +7,7 @@ use App\Models\EsimPlan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Exigence produit : « pour esim plans je veux qu'on ait 3 onglets pour
@@ -21,7 +22,7 @@ class AdminEsimPlanTabsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create();
+        $this->admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
     }
 
     public function test_each_tab_shows_only_its_own_zone(): void

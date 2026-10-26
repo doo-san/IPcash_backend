@@ -8,6 +8,7 @@ use App\Models\BillProvider;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Exigence produit : « forfaits factures et fournisseurs de factures
@@ -22,7 +23,7 @@ class AdminBillProviderPlansTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create();
+        $this->admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
     }
 
     public function test_can_create_edit_and_delete_a_plan_from_the_providers_page(): void

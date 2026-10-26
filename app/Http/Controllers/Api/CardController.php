@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Enums\CardStatus;
 use App\Enums\FeeScope;
 use App\Enums\TransactionType;
+use App\Exceptions\InsufficientFundsException;
 use App\Http\Controllers\Api\Concerns\HandlesIdempotency;
+use App\Http\Controllers\Api\Concerns\LocksRowsForUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Card\GenerateEphemeralCardRequest;
 use App\Http\Requests\Card\RevealRequest;
@@ -29,6 +31,7 @@ use Symfony\Component\HttpFoundation\Response;
 class CardController extends Controller
 {
     use HandlesIdempotency;
+    use LocksRowsForUpdate;
 
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -117,27 +120,32 @@ class CardController extends Controller
             return response()->json((new TransactionResource($existing))->resolve(), 202);
         }
 
-        if ($account->balance_xof < $totalXof) {
+        try {
+            $transaction = DB::transaction(function () use ($account, $card, $amountXof, $totalXof, $feeXof, $idempotencyKey) {
+                $account = $this->lockForUpdate($account);
+                if ($account->balance_xof < $totalXof) {
+                    throw new InsufficientFundsException;
+                }
+
+                $account->decrement('balance_xof', $totalXof);
+                $card->increment('balance_xof', $amountXof);
+
+                return $account->transactions()->create([
+                    'card_id' => $card->id,
+                    'type' => TransactionType::CardTopUp,
+                    'status' => 'completed',
+                    'amount_xof' => $totalXof,
+                    'fee_xof' => $feeXof,
+                    'reference' => 'CARDTOPUP-'.strtoupper(Str::random(10)),
+                    'idempotency_key' => $idempotencyKey,
+                    'main_balance_after_xof' => $account->balance_xof,
+                    'card_balance_after_xof' => $card->balance_xof,
+                    'card_last4' => $card->last4,
+                ]);
+            });
+        } catch (InsufficientFundsException) {
             return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde principal insuffisant.'], 402);
         }
-
-        $transaction = DB::transaction(function () use ($account, $card, $amountXof, $totalXof, $feeXof, $idempotencyKey) {
-            $account->decrement('balance_xof', $totalXof);
-            $card->increment('balance_xof', $amountXof);
-
-            return $account->transactions()->create([
-                'card_id' => $card->id,
-                'type' => TransactionType::CardTopUp,
-                'status' => 'completed',
-                'amount_xof' => $totalXof,
-                'fee_xof' => $feeXof,
-                'reference' => 'CARDTOPUP-'.strtoupper(Str::random(10)),
-                'idempotency_key' => $idempotencyKey,
-                'main_balance_after_xof' => $account->balance_xof,
-                'card_balance_after_xof' => $card->balance_xof,
-                'card_last4' => $card->last4,
-            ]);
-        });
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }
@@ -162,26 +170,31 @@ class CardController extends Controller
             return response()->json((new TransactionResource($existing))->resolve(), 202);
         }
 
-        if ($card->balance_xof < $amountXof) {
+        try {
+            $transaction = DB::transaction(function () use ($account, $card, $amountXof, $idempotencyKey) {
+                $card = $this->lockForUpdate($card);
+                if ($card->balance_xof < $amountXof) {
+                    throw new InsufficientFundsException;
+                }
+
+                $card->decrement('balance_xof', $amountXof);
+                $account->increment('balance_xof', $amountXof);
+
+                return $account->transactions()->create([
+                    'card_id' => $card->id,
+                    'type' => TransactionType::CardWithdrawal,
+                    'status' => 'completed',
+                    'amount_xof' => -$amountXof,
+                    'reference' => 'CARDOUT-'.strtoupper(Str::random(10)),
+                    'idempotency_key' => $idempotencyKey,
+                    'main_balance_after_xof' => $account->balance_xof,
+                    'card_balance_after_xof' => $card->balance_xof,
+                    'card_last4' => $card->last4,
+                ]);
+            });
+        } catch (InsufficientFundsException) {
             return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde de la carte insuffisant.'], 402);
         }
-
-        $transaction = DB::transaction(function () use ($account, $card, $amountXof, $idempotencyKey) {
-            $card->decrement('balance_xof', $amountXof);
-            $account->increment('balance_xof', $amountXof);
-
-            return $account->transactions()->create([
-                'card_id' => $card->id,
-                'type' => TransactionType::CardWithdrawal,
-                'status' => 'completed',
-                'amount_xof' => -$amountXof,
-                'reference' => 'CARDOUT-'.strtoupper(Str::random(10)),
-                'idempotency_key' => $idempotencyKey,
-                'main_balance_after_xof' => $account->balance_xof,
-                'card_balance_after_xof' => $card->balance_xof,
-                'card_last4' => $card->last4,
-            ]);
-        });
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }
@@ -302,22 +315,27 @@ class CardController extends Controller
             return response()->json((new TransactionResource($existing))->resolve(), 202);
         }
 
-        if ($account->balance_xof < $amountXof) {
+        try {
+            $transaction = DB::transaction(function () use ($account, $ephemeralCard, $amountXof, $idempotencyKey) {
+                $account = $this->lockForUpdate($account);
+                if ($account->balance_xof < $amountXof) {
+                    throw new InsufficientFundsException;
+                }
+
+                $account->decrement('balance_xof', $amountXof);
+                $ephemeralCard->increment('balance_xof', $amountXof);
+
+                return $account->transactions()->create([
+                    'type' => TransactionType::CardTopUp,
+                    'status' => 'completed',
+                    'amount_xof' => -$amountXof,
+                    'reference' => 'CARDTOPUP-'.strtoupper(Str::random(10)),
+                    'idempotency_key' => $idempotencyKey,
+                ]);
+            });
+        } catch (InsufficientFundsException) {
             return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde insuffisant pour effectuer cette opération.'], 402);
         }
-
-        $transaction = DB::transaction(function () use ($account, $ephemeralCard, $amountXof, $idempotencyKey) {
-            $account->decrement('balance_xof', $amountXof);
-            $ephemeralCard->increment('balance_xof', $amountXof);
-
-            return $account->transactions()->create([
-                'type' => TransactionType::CardTopUp,
-                'status' => 'completed',
-                'amount_xof' => -$amountXof,
-                'reference' => 'CARDTOPUP-'.strtoupper(Str::random(10)),
-                'idempotency_key' => $idempotencyKey,
-            ]);
-        });
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }
@@ -341,22 +359,27 @@ class CardController extends Controller
             return response()->json((new TransactionResource($existing))->resolve(), 202);
         }
 
-        if ($ephemeralCard->balance_xof < $amountXof) {
+        try {
+            $transaction = DB::transaction(function () use ($account, $ephemeralCard, $amountXof, $idempotencyKey) {
+                $ephemeralCard = $this->lockForUpdate($ephemeralCard);
+                if ($ephemeralCard->balance_xof < $amountXof) {
+                    throw new InsufficientFundsException;
+                }
+
+                $ephemeralCard->decrement('balance_xof', $amountXof);
+                $account->increment('balance_xof', $amountXof);
+
+                return $account->transactions()->create([
+                    'type' => TransactionType::CardWithdrawal,
+                    'status' => 'completed',
+                    'amount_xof' => $amountXof,
+                    'reference' => 'CARDOUT-'.strtoupper(Str::random(10)),
+                    'idempotency_key' => $idempotencyKey,
+                ]);
+            });
+        } catch (InsufficientFundsException) {
             return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde de la carte éphémère insuffisant.'], 402);
         }
-
-        $transaction = DB::transaction(function () use ($account, $ephemeralCard, $amountXof, $idempotencyKey) {
-            $ephemeralCard->decrement('balance_xof', $amountXof);
-            $account->increment('balance_xof', $amountXof);
-
-            return $account->transactions()->create([
-                'type' => TransactionType::CardWithdrawal,
-                'status' => 'completed',
-                'amount_xof' => $amountXof,
-                'reference' => 'CARDOUT-'.strtoupper(Str::random(10)),
-                'idempotency_key' => $idempotencyKey,
-            ]);
-        });
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }

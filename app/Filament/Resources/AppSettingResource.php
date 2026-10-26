@@ -66,4 +66,21 @@ class AppSettingResource extends Resource
             'edit' => Pages\EditAppSetting::route('/{record}/edit'),
         ];
     }
+
+    // Paramètres globaux (feature flags, kill switches…) : modification
+    // réservée à `super_admin` — `support` ne voit la liste qu'en lecture.
+    public static function canCreate(): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
 }

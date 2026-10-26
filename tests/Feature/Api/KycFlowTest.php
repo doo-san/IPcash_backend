@@ -20,7 +20,7 @@ class KycFlowTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Storage::fake('public');
+        Storage::fake('kyc');
         $this->account = Account::create(['phone_number' => '+221771234567']);
     }
 
@@ -45,7 +45,7 @@ class KycFlowTest extends TestCase
             'extractedLastName' => 'Ba',
         ]);
 
-        Storage::disk('public')->assertDirectoryEmpty('kyc');
+        Storage::disk('kyc')->assertDirectoryEmpty('kyc');
     }
 
     public function test_verify_face_returns_simulated_success(): void
@@ -76,8 +76,28 @@ class KycFlowTest extends TestCase
         $this->assertSame('pending', $this->account->kyc_status->value);
 
         $document = $this->account->kycDocuments()->first();
-        Storage::disk('public')->assertExists($document->front_path);
-        Storage::disk('public')->assertExists($document->selfie_path);
+        Storage::disk('kyc')->assertExists($document->front_path);
+        Storage::disk('kyc')->assertExists($document->selfie_path);
+    }
+
+    // Régression sécurité : les pièces KYC ne doivent jamais être servies
+    // par un chemin public direct (ancien comportement sur le disque
+    // `public`). Le disque `kyc` n'a pas de symlink dans `public/` — le
+    // fichier n'existe donc nulle part sous une URL non signée.
+    public function test_submitted_documents_are_not_reachable_through_the_public_storage_path(): void
+    {
+        $this->postJson('/api/kyc/documents', [
+            'documentType' => 'nationalId',
+            'front' => UploadedFile::fake()->image('front.jpg'),
+            'selfie' => UploadedFile::fake()->image('selfie.jpg'),
+        ], $this->authHeader());
+
+        $document = $this->account->kycDocuments()->first();
+        Storage::disk('public')->assertMissing($document->front_path);
+        // Le disque `local` (route `/storage`) refuse aussi les requêtes non
+        // signées (visibilité par défaut "private") : quoi qu'il en soit, le
+        // document n'est jamais accessible par ce chemin sans signature.
+        $this->get("/storage/{$document->front_path}")->assertForbidden();
     }
 
     // Régression : `postJson()` ci-dessus encode les champs non-fichiers en

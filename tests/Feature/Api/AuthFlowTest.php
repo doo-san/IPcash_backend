@@ -225,4 +225,41 @@ class AuthFlowTest extends TestCase
             'deviceId' => 'device-1',
         ])->assertOk();
     }
+
+    public function test_pin_creation_is_rate_limited(): void
+    {
+        $register = $this->postJson('/api/auth/register/phone', [
+            'phoneNumber' => self::PHONE,
+            'locale' => 'fr',
+        ])->assertOk()->json();
+
+        $verify = $this->postJson('/api/auth/otp/verify', [
+            'otpRequestId' => $register['otpRequestId'],
+            'code' => '111111',
+        ])->assertOk()->json();
+
+        // Jeton à usage unique : les 9 premiers essais échouent sur le PIN
+        // invalide (401, le jeton reste valide puisque /auth/pin ne le
+        // consomme qu'en cas de succès), seul le 10e déclenche le throttle.
+        for ($i = 0; $i < 9; $i++) {
+            $this->postJson('/api/auth/pin', ['pin' => 'invalidxx'], [
+                'X-Session-Token' => $verify['sessionToken'],
+            ])->assertStatus(422);
+        }
+
+        $this->postJson('/api/auth/pin', ['pin' => '123456'], [
+            'X-Session-Token' => $verify['sessionToken'],
+        ])->assertStatus(429);
+    }
+
+    public function test_refresh_is_rate_limited(): void
+    {
+        for ($i = 0; $i < 10; $i++) {
+            $this->postJson('/api/auth/refresh', ['refreshToken' => "guessed-token-{$i}"])
+                ->assertStatus(401);
+        }
+
+        $this->postJson('/api/auth/refresh', ['refreshToken' => 'one-too-many'])
+            ->assertStatus(429);
+    }
 }

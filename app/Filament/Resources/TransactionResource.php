@@ -4,7 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Enums\TransactionStatus;
 use App\Enums\TransactionType;
+use App\Exceptions\InsufficientFundsException;
 use App\Filament\Resources\TransactionResource\Pages;
+use App\Models\Account;
 use App\Models\Transaction;
 use Filament\Forms;
 use Filament\Notifications\Notification;
@@ -72,7 +74,8 @@ class TransactionResource extends Resource
                     ->label('Résoudre')
                     ->icon('heroicon-o-wrench')
                     ->color('warning')
-                    ->visible(fn (Transaction $record) => $record->status === TransactionStatus::Pending)
+                    ->visible(fn (Transaction $record) => auth()->user()->isSuperAdmin()
+                        && $record->status === TransactionStatus::Pending)
                     ->form([
                         Forms\Components\Select::make('outcome')
                             ->label('Issue')
@@ -108,21 +111,42 @@ class TransactionResource extends Resource
                     ->label('Inverser')
                     ->icon('heroicon-o-arrow-uturn-left')
                     ->color('danger')
-                    ->visible(fn (Transaction $record) => $record->status === TransactionStatus::Completed)
+                    ->visible(fn (Transaction $record) => auth()->user()->isSuperAdmin()
+                        && $record->status === TransactionStatus::Completed)
                     ->form([
                         Forms\Components\Textarea::make('reason')
                             ->label('Motif (obligatoire)')
                             ->required(),
                     ])
                     ->requiresConfirmation()
-                    ->modalDescription('Le montant est reversé au solde du client. Cette action ne peut être annulée que par un nouvel ajustement manuel.')
+                    ->modalDescription('Le montant est reversé au solde du client. Si ce mouvement a un pendant chez un autre compte (transfert P2P, envoi IPchange), son solde est débité en retour dans la même opération — annulée si ce compte n\'a plus assez pour ça.')
                     ->action(function (Transaction $record, array $data) {
-                        DB::transaction(function () use ($record, $data) {
-                            $record->account->increment('balance_xof', -$record->amount_xof);
-                            $record->status = TransactionStatus::Reversed;
-                            $record->failure_reason = $data['reason'];
-                            $record->save();
-                        });
+                        try {
+                            DB::transaction(function () use ($record, $data) {
+                                static::reverseOne($record, $data['reason']);
+
+                                // Un transfert P2P/IPchange crée deux écritures liées
+                                // par convention de référence (`REF` chez l'émetteur,
+                                // `REF-R` chez le destinataire — voir TransferController
+                                // et ForeignBalanceController::send). Inverser une seule
+                                // des deux laisserait l'argent dupliqué : le destinataire
+                                // garderait la somme reçue tout en la recréditant à
+                                // l'émetteur. On inverse donc aussi le pendant s'il existe
+                                // et n'a pas déjà été traité.
+                                $counterpart = static::findCounterpart($record);
+                                if ($counterpart && $counterpart->status === TransactionStatus::Completed) {
+                                    static::reverseOne($counterpart, $data['reason']);
+                                }
+                            });
+                        } catch (InsufficientFundsException) {
+                            Notification::make()
+                                ->title('Inversion impossible')
+                                ->body('Le compte en face de ce mouvement n\'a plus un solde suffisant pour être débité en retour — rien n\'a été modifié.')
+                                ->danger()
+                                ->send();
+
+                            return;
+                        }
 
                         Notification::make()->title('Transaction inversée')->success()->send();
                     }),
@@ -141,5 +165,40 @@ class TransactionResource extends Resource
     public static function canCreate(): bool
     {
         return false;
+    }
+
+    // Annule l'effet d'une écriture sur le solde de son compte (verrou
+    // pessimiste, comme `LocksRowsForUpdate` côté API — voir CLAUDE.md).
+    // Générique dans les deux sens : annuler un débit (amount_xof < 0)
+    // recrédite, annuler un crédit (amount_xof > 0) redébite.
+    private static function reverseOne(Transaction $record, string $reason): void
+    {
+        /** @var Account $account */
+        $account = $record->account()->lockForUpdate()->firstOrFail();
+        $undoAmount = -$record->amount_xof;
+
+        if ($undoAmount < 0 && $account->balance_xof < abs($undoAmount)) {
+            throw new InsufficientFundsException;
+        }
+
+        $account->increment('balance_xof', $undoAmount);
+        $record->status = TransactionStatus::Reversed;
+        $record->failure_reason = $reason;
+        $record->save();
+    }
+
+    private static function findCounterpart(Transaction $record): ?Transaction
+    {
+        if ($record->reference === null) {
+            return null;
+        }
+
+        $counterpartReference = str_ends_with($record->reference, '-R')
+            ? substr($record->reference, 0, -2)
+            : "{$record->reference}-R";
+
+        return Transaction::where('reference', $counterpartReference)
+            ->where('id', '!=', $record->id)
+            ->first();
     }
 }

@@ -18,6 +18,8 @@
         </include>
     </source>
     <php>
+        <!-- Toute la suite tourne dans un seul processus ; la génération de PDF (dompdf, polices) dépasse les 128M par défaut en cumul. -->
+        <ini name="memory_limit" value="512M"/>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>

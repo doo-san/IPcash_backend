@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\TransactionType;
+use App\Exceptions\InsufficientFundsException;
 use App\Http\Controllers\Api\Concerns\HandlesIdempotency;
+use App\Http\Controllers\Api\Concerns\LocksRowsForUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Cashio\AmountOnlyRequest;
 use App\Http\Requests\Pocket\CreatePocketRequest;
@@ -26,6 +28,7 @@ use Symfony\Component\HttpFoundation\Response;
 class PocketController extends Controller
 {
     use HandlesIdempotency;
+    use LocksRowsForUpdate;
 
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -93,26 +96,31 @@ class PocketController extends Controller
             return response()->json((new TransactionResource($existing))->resolve(), 202);
         }
 
-        if ($account->balance_xof < $amountXof) {
+        try {
+            $transaction = DB::transaction(function () use ($account, $pocket, $amountXof, $idempotencyKey) {
+                $account = $this->lockForUpdate($account);
+                if ($account->balance_xof < $amountXof) {
+                    throw new InsufficientFundsException;
+                }
+
+                $account->decrement('balance_xof', $amountXof);
+                $pocket->increment('balance_xof', $amountXof);
+
+                return $account->transactions()->create([
+                    'pocket_id' => $pocket->id,
+                    'type' => TransactionType::PocketTransferIn,
+                    'status' => 'completed',
+                    'amount_xof' => $amountXof,
+                    'reference' => 'IP-'.strtoupper(Str::random(8)),
+                    'idempotency_key' => $idempotencyKey,
+                    'main_balance_after_xof' => $account->balance_xof,
+                    'pocket_balance_after_xof' => $pocket->balance_xof,
+                    'pocket_name' => $pocket->name,
+                ]);
+            });
+        } catch (InsufficientFundsException) {
             return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde principal insuffisant.'], 402);
         }
-
-        $transaction = DB::transaction(function () use ($account, $pocket, $amountXof, $idempotencyKey) {
-            $account->decrement('balance_xof', $amountXof);
-            $pocket->increment('balance_xof', $amountXof);
-
-            return $account->transactions()->create([
-                'pocket_id' => $pocket->id,
-                'type' => TransactionType::PocketTransferIn,
-                'status' => 'completed',
-                'amount_xof' => $amountXof,
-                'reference' => 'IP-'.strtoupper(Str::random(8)),
-                'idempotency_key' => $idempotencyKey,
-                'main_balance_after_xof' => $account->balance_xof,
-                'pocket_balance_after_xof' => $pocket->balance_xof,
-                'pocket_name' => $pocket->name,
-            ]);
-        });
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }
@@ -141,26 +149,31 @@ class PocketController extends Controller
             return response()->json(['code' => 'POCKET_LOCKED', 'message' => 'Cette poche est verrouillée.'], 400);
         }
 
-        if ($pocket->balance_xof < $amountXof) {
+        try {
+            $transaction = DB::transaction(function () use ($account, $pocket, $amountXof, $idempotencyKey) {
+                $pocket = $this->lockForUpdate($pocket);
+                if ($pocket->balance_xof < $amountXof) {
+                    throw new InsufficientFundsException;
+                }
+
+                $pocket->decrement('balance_xof', $amountXof);
+                $account->increment('balance_xof', $amountXof);
+
+                return $account->transactions()->create([
+                    'pocket_id' => $pocket->id,
+                    'type' => TransactionType::PocketTransferOut,
+                    'status' => 'completed',
+                    'amount_xof' => -$amountXof,
+                    'reference' => 'IP-'.strtoupper(Str::random(8)),
+                    'idempotency_key' => $idempotencyKey,
+                    'main_balance_after_xof' => $account->balance_xof,
+                    'pocket_balance_after_xof' => $pocket->balance_xof,
+                    'pocket_name' => $pocket->name,
+                ]);
+            });
+        } catch (InsufficientFundsException) {
             return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde de la poche insuffisant.'], 402);
         }
-
-        $transaction = DB::transaction(function () use ($account, $pocket, $amountXof, $idempotencyKey) {
-            $pocket->decrement('balance_xof', $amountXof);
-            $account->increment('balance_xof', $amountXof);
-
-            return $account->transactions()->create([
-                'pocket_id' => $pocket->id,
-                'type' => TransactionType::PocketTransferOut,
-                'status' => 'completed',
-                'amount_xof' => -$amountXof,
-                'reference' => 'IP-'.strtoupper(Str::random(8)),
-                'idempotency_key' => $idempotencyKey,
-                'main_balance_after_xof' => $account->balance_xof,
-                'pocket_balance_after_xof' => $pocket->balance_xof,
-                'pocket_name' => $pocket->name,
-            ]);
-        });
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }

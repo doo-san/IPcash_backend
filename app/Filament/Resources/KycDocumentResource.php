@@ -97,18 +97,20 @@ class KycDocumentResource extends Resource
                     ->label('Approuver')
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn (KycDocument $record) => in_array($record->status, [
-                        KycVerificationStatus::Pending, KycVerificationStatus::Review,
-                    ]))
+                    ->visible(fn (KycDocument $record) => auth()->user()->isSuperAdmin()
+                        && in_array($record->status, [
+                            KycVerificationStatus::Pending, KycVerificationStatus::Review,
+                        ]))
                     ->requiresConfirmation()
                     ->action(fn (KycDocument $record) => static::decide($record, KycVerificationStatus::Verified)),
                 Tables\Actions\Action::make('reject')
                     ->label('Rejeter')
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->visible(fn (KycDocument $record) => in_array($record->status, [
-                        KycVerificationStatus::Pending, KycVerificationStatus::Review,
-                    ]))
+                    ->visible(fn (KycDocument $record) => auth()->user()->isSuperAdmin()
+                        && in_array($record->status, [
+                            KycVerificationStatus::Pending, KycVerificationStatus::Review,
+                        ]))
                     ->form([
                         Forms\Components\Textarea::make('reason')
                             ->label('Motif du rejet')
@@ -140,14 +142,14 @@ class KycDocumentResource extends Resource
                 ]),
             Section::make('Documents fournis')
                 ->description(
-                    'Stockage disque "public" pour le moment — à déplacer sur un disque privé '.
-                    'avec URLs signées avant la mise en production (données KYC sensibles).',
+                    'Disque privé dédié : chaque image ci-dessous est servie via une URL '.
+                    'signée temporaire (5 minutes), jamais par un chemin public direct.',
                 )
                 ->columns(3)
                 ->schema([
-                    ImageEntry::make('front_path')->label('Recto')->disk('public'),
-                    ImageEntry::make('back_path')->label('Verso')->disk('public'),
-                    ImageEntry::make('selfie_path')->label('Selfie')->disk('public'),
+                    ImageEntry::make('front_path')->label('Recto')->disk('kyc')->visibility('private'),
+                    ImageEntry::make('back_path')->label('Verso')->disk('kyc')->visibility('private'),
+                    ImageEntry::make('selfie_path')->label('Selfie')->disk('kyc')->visibility('private'),
                 ]),
             Section::make('Revue')
                 ->columns(3)

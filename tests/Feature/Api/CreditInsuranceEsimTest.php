@@ -5,16 +5,16 @@ namespace Tests\Feature\Api;
 use App\Models\Account;
 use App\Models\CreditOperator;
 use App\Models\EsimPlan;
-use App\Models\FeeRule;
 use App\Models\InsurancePlan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
-// Crédit, assurance et eSIM : aucun fournisseur tiers n'est réellement
-// intégré (CLAUDE.md règle 9) — ces trois achats renvoient toujours
-// INTEGRATION_PENDING après vérification PIN/solde, jamais une fausse
-// réussite. Les catalogues (opérateurs, forfaits eSIM) restent réels.
+// Crédit et eSIM : aucun fournisseur tiers n'est réellement intégré
+// (CLAUDE.md règle 9) — ces achats renvoient toujours INTEGRATION_PENDING
+// après vérification PIN/solde, jamais une fausse réussite. Les catalogues
+// (opérateurs, forfaits eSIM et assurance) restent réels. La souscription
+// d'assurance a son propre parcours, voir InsurancePolicyFlowTest.
 class CreditInsuranceEsimTest extends TestCase
 {
     use RefreshDatabase;
@@ -85,47 +85,6 @@ class CreditInsuranceEsimTest extends TestCase
         $this->assertSame('failed', $tx->status->value);
         $this->assertSame(-5000, $tx->amount_xof);
         $this->assertSame(10000, $account->fresh()->balance_xof);
-    }
-
-    public function test_insurance_purchase_returns_pending_and_records_a_failed_attempt(): void
-    {
-        $account = $this->account(10000);
-
-        $this->postJson('/api/insurance/purchase', [
-            'type' => 'auto', 'plateNumber' => 'DK-1234-AB', 'amountXof' => 5000, 'pin' => '123456',
-        ], $this->idempotentHeader($account))->assertStatus(400)->assertJson(['code' => 'INTEGRATION_PENDING']);
-
-        $tx = $account->transactions()->latest()->first();
-        $this->assertSame('insurancePurchase', $tx->type->value);
-        $this->assertSame('failed', $tx->status->value);
-        $this->assertSame(10000, $account->fresh()->balance_xof);
-    }
-
-    public function test_a_replayed_idempotency_key_does_not_duplicate_the_failed_attempt(): void
-    {
-        $account = $this->account(10000);
-        $headers = $this->idempotentHeader($account);
-
-        $this->postJson('/api/insurance/purchase', [
-            'type' => 'auto', 'plateNumber' => 'DK-1234-AB', 'amountXof' => 5000, 'pin' => '123456',
-        ], $headers)->assertStatus(400);
-
-        auth()->forgetGuards();
-        $this->postJson('/api/insurance/purchase', [
-            'type' => 'auto', 'plateNumber' => 'DK-1234-AB', 'amountXof' => 5000, 'pin' => '123456',
-        ], $headers)->assertStatus(400);
-
-        $this->assertSame(1, $account->transactions()->count());
-    }
-
-    public function test_insurance_fee_is_included_in_the_balance_check(): void
-    {
-        FeeRule::create(['scope' => 'insurance', 'type' => 'fixed', 'value' => 2000]);
-        $account = $this->account(6000); // couvre 5000 mais pas 5000 + 2000 de frais
-
-        $this->postJson('/api/insurance/purchase', [
-            'type' => 'auto', 'plateNumber' => 'DK-1234-AB', 'amountXof' => 5000, 'pin' => '123456',
-        ], $this->idempotentHeader($account))->assertStatus(402);
     }
 
     public function test_insurance_plans_lists_only_active_ones(): void

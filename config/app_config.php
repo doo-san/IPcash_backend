@@ -79,4 +79,35 @@ return [
             'feature_pockets_enabled' => ['label' => "Poches d'épargne", 'type' => 'toggle', 'default' => true],
         ],
     ],
+
+    // Mentions imprimées sur chaque attestation d'assurance émise (voir
+    // InsurancePolicyService). Vides par défaut, volontairement : la
+    // validation d'un contrat est refusée tant qu'elles ne sont pas toutes
+    // renseignées — jamais d'attestation avec un assureur ou un agrément
+    // inventé. Non exposées à l'app (absentes de AppConfig::publicPayload).
+    'insurance' => [
+        'label' => 'Assurance (mentions de l\'attestation)',
+        'fields' => [
+            'insurance_insurer_name' => [
+                'label' => 'Compagnie d\'assurance (porteuse du risque)',
+                'type' => 'text',
+                'default' => '',
+            ],
+            'insurance_intermediary_name' => [
+                'label' => 'Intermédiaire (raison sociale d\'IPCash)',
+                'type' => 'text',
+                'default' => '',
+            ],
+            'insurance_agreement_number' => [
+                'label' => 'Numéro d\'agrément de l\'intermédiaire',
+                'type' => 'text',
+                'default' => '',
+            ],
+            'insurance_guarantees' => [
+                'label' => 'Garanties couvertes (texte imprimé)',
+                'type' => 'textarea',
+                'default' => '',
+            ],
+        ],
+    ],
 ];

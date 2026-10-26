@@ -25,16 +25,21 @@ class User extends Authenticatable implements FilamentUser
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
-    // Sans cette méthode, Filament n'autorise l'accès au panneau qu'en
-    // environnement `local` (garde-fou par défaut) — ce qui bloquerait
-    // aussi bien les tests que la production une fois déployée. Tout
-    // compte de la table `users` est un membre du staff (aucun client
-    // mobile n'y figure jamais) : un compte qui existe ici a le droit
-    // d'entrer, les rôles/permissions filtrent ensuite ce qu'il peut y
-    // faire (ressources, actions).
+    // Tout compte de la table `users` est un membre du staff (aucun client
+    // mobile n'y figure jamais), mais un compte créé sans rôle (erreur
+    // d'admin, script, future intégration SSO) ne doit pas pouvoir entrer
+    // dans le panneau pour autant : il faut explicitement `super_admin` ou
+    // `support` (voir `RoleSeeder`). Les rôles filtrent ensuite ce qu'un
+    // compte peut y faire une fois dans le panneau (voir les `->visible()`
+    // sur les actions qui déplacent de l'argent ou décident du KYC).
     public function canAccessPanel(Panel $panel): bool
     {
-        return true;
+        return $this->hasAnyRole(['super_admin', 'support']);
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('super_admin');
     }
 
     /**

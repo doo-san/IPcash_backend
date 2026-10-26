@@ -90,4 +90,22 @@ class ExchangeRateResource extends Resource
             'edit' => Pages\EditExchangeRate::route('/{record}/edit'),
         ];
     }
+
+    // Taux utilisés pour toute conversion réelle de solde (IPchange) :
+    // modification réservée à `super_admin` — `support` ne voit la liste
+    // qu'en lecture.
+    public static function canCreate(): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
 }

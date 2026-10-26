@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\FeeScope;
 use App\Enums\TransactionType;
+use App\Exceptions\InsufficientFundsException;
 use App\Http\Controllers\Api\Concerns\HandlesIdempotency;
+use App\Http\Controllers\Api\Concerns\LocksRowsForUpdate;
 use App\Http\Controllers\Api\Concerns\RecordsPendingIntegration;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Cashio\AmountOnlyRequest;
@@ -55,6 +57,7 @@ use Throwable;
 class CashioController extends Controller
 {
     use HandlesIdempotency;
+    use LocksRowsForUpdate;
     use RecordsPendingIntegration;
 
     public function cashin(CashinRequest $request): JsonResponse
@@ -291,31 +294,44 @@ class CashioController extends Controller
             return response()->json((new TransactionResource($existing))->resolve(), 202);
         }
 
+        // Wave est le seul opérateur mobile money avec un retrait réellement
+        // branché (WaveClient::sendPayout) — Orange Money (dépôt seulement
+        // pour l'instant) et Mixx by Yas restent sur la simulation interne.
+        // Note : le solde n'est débité pour Wave qu'à la confirmation du
+        // paiement (voir applyWavePayoutStatus), qui relit déjà le solde
+        // sous verrou — ce contrôle-ci ne sert pour Wave qu'à rejeter tout
+        // de suite une tentative manifestement vouée à l'échec.
         if ($account->balance_xof < $totalXof) {
             return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde insuffisant pour effectuer cette opération.'], 402);
         }
 
-        // Wave est le seul opérateur mobile money avec un retrait réellement
-        // branché (WaveClient::sendPayout) — Orange Money (dépôt seulement
-        // pour l'instant) et Mixx by Yas restent sur la simulation interne.
         $provider = MobileMoneyProvider::find($data['providerId']);
         if ($provider?->isWave() && $provider->isConfigured()) {
             return $this->cashoutViaWave($account, $provider, $amountXof, $feeXof, $totalXof, $promoCode, $idempotencyKey);
         }
 
-        $transaction = DB::transaction(function () use ($account, $totalXof, $feeXof, $promoCode, $idempotencyKey) {
-            $account->decrement('balance_xof', $totalXof);
-            $promoCode?->increment('redemptions_count');
+        try {
+            $transaction = DB::transaction(function () use ($account, $totalXof, $feeXof, $promoCode, $idempotencyKey) {
+                $account = $this->lockForUpdate($account);
+                if ($account->balance_xof < $totalXof) {
+                    throw new InsufficientFundsException;
+                }
 
-            return $account->transactions()->create([
-                'type' => TransactionType::CashOut,
-                'status' => 'completed',
-                'amount_xof' => -$totalXof,
-                'fee_xof' => $feeXof,
-                'reference' => 'CASHOUT-'.strtoupper(Str::random(10)),
-                'idempotency_key' => $idempotencyKey,
-            ]);
-        });
+                $account->decrement('balance_xof', $totalXof);
+                $promoCode?->increment('redemptions_count');
+
+                return $account->transactions()->create([
+                    'type' => TransactionType::CashOut,
+                    'status' => 'completed',
+                    'amount_xof' => -$totalXof,
+                    'fee_xof' => $feeXof,
+                    'reference' => 'CASHOUT-'.strtoupper(Str::random(10)),
+                    'idempotency_key' => $idempotencyKey,
+                ]);
+            });
+        } catch (InsufficientFundsException) {
+            return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde insuffisant pour effectuer cette opération.'], 402);
+        }
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }
@@ -373,8 +389,39 @@ class CashioController extends Controller
         string $payoutId,
     ): void {
         if ($waveStatus === 'succeeded') {
+            // Wave a déjà réellement payé à ce stade (argent sorti pour de
+            // vrai côté opérateur) : contrairement aux autres opérations,
+            // on ne peut plus refuser le débit s'il s'avère insuffisant —
+            // seulement le relever pour une réconciliation manuelle plutôt
+            // que de planter silencieusement. Le verrou protège uniquement
+            // contre un double traitement du même paiement confirmé (ex.
+            // webhook + relance planifiée arrivant en même temps).
             DB::transaction(function () use ($account, $totalXof, $promoCode, $transaction) {
-                $account->decrement('balance_xof', $totalXof);
+                $account = $this->lockForUpdate($account);
+
+                // La contrainte `balance_xof >= 0` en base refuserait le
+                // débit si le solde local est insuffisant à ce stade — un
+                // cas qui ne doit jamais arriver en usage normal (vérifié
+                // avant d'appeler Wave), mais qui reste possible si le
+                // solde a bougé pendant l'appel réseau. On ne peut plus
+                // annuler : Wave a déjà réellement payé. On évite donc
+                // d'exécuter un décrément voué à l'échec (sur Postgres, une
+                // requête rejetée invalide le reste de la transaction en
+                // cours, y compris la mise à jour du statut ci-dessous) :
+                // on contrôle en PHP avant, et on alerte pour une
+                // réconciliation manuelle plutôt que de laisser échouer
+                // silencieusement la mise à jour du statut.
+                if ($account->balance_xof >= $totalXof) {
+                    $account->decrement('balance_xof', $totalXof);
+                } else {
+                    logger()->error('[wave] payout confirmé mais solde local insuffisant pour le débit — réconciliation manuelle requise', [
+                        'account_id' => $account->id,
+                        'transaction_id' => $transaction->id,
+                        'balance_xof' => $account->balance_xof,
+                        'amount_xof' => $totalXof,
+                    ]);
+                }
+
                 $promoCode?->increment('redemptions_count');
                 $transaction->update(['status' => 'completed', 'provider_reference' => null]);
             });

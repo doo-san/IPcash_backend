@@ -8,6 +8,7 @@ use App\Models\FeeRule;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Le champ "Taux" d'une règle de frais en pourcentage se saisit en
@@ -24,7 +25,7 @@ class AdminFeeRulePercentInputTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create();
+        $this->admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
     }
 
     public function test_creating_a_percent_rule_with_1_stores_100_basis_points(): void

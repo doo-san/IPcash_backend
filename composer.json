@@ -9,6 +9,7 @@
         "php": "^8.3",
         "ext-pdo_pgsql": "*",
         "anthropic-ai/sdk": "^0.47.0",
+        "barryvdh/laravel-dompdf": "^3.1",
         "filament/filament": "^3.3",
         "laravel/framework": "^13.17",
         "laravel/sanctum": "^4.0",

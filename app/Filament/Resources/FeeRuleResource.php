@@ -105,4 +105,22 @@ class FeeRuleResource extends Resource
             'edit' => Pages\EditFeeRule::route('/{record}/edit'),
         ];
     }
+
+    // Les frais s'appliquent à tous les clients : modification réservée à
+    // `super_admin` (voir `RoleSeeder`/`User::canAccessPanel()`) — `support`
+    // ne voit la grille qu'en lecture.
+    public static function canCreate(): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
+
+    public static function canEdit($record): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
+
+    public static function canDelete($record): bool
+    {
+        return auth()->user()->isSuperAdmin();
+    }
 }

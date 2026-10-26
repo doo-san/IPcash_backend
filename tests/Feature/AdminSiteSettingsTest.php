@@ -11,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Réglages globaux du site public, répartis en sous-pages du groupe de
@@ -23,7 +24,7 @@ class AdminSiteSettingsTest extends TestCase
 
     public function test_every_sub_page_renders(): void
     {
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
 
         $this->actingAs($admin)->get('/admin/site-header-page')->assertOk();
         $this->actingAs($admin)->get('/admin/site-footer-page')->assertOk();
@@ -33,7 +34,7 @@ class AdminSiteSettingsTest extends TestCase
 
     public function test_saving_a_social_link_makes_it_appear_in_the_footer(): void
     {
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
 
         Livewire::actingAs($admin)
             ->test(SiteFooterPage::class)
@@ -51,7 +52,7 @@ class AdminSiteSettingsTest extends TestCase
     public function test_uploading_a_logo_overrides_the_default_asset(): void
     {
         Storage::fake('public');
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
 
         Livewire::actingAs($admin)
             ->test(SiteHeaderPage::class)
@@ -67,7 +68,7 @@ class AdminSiteSettingsTest extends TestCase
 
     public function test_saving_a_seo_title_changes_the_public_page_title(): void
     {
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
 
         Livewire::actingAs($admin)
             ->test(SiteSeoPage::class)

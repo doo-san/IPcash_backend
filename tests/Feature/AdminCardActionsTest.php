@@ -9,6 +9,7 @@ use App\Models\Card;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Exigence produit : sur « Cartes », la liste n'affiche que les
@@ -25,7 +26,7 @@ class AdminCardActionsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create();
+        $this->admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
         $this->account = Account::create(['phone_number' => '+221770000090']);
     }
 

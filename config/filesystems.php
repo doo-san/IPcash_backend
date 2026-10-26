@@ -38,6 +38,40 @@ return [
             'report' => false,
         ],
 
+        // Pièces KYC (pièce d'identité, selfie) — disque dédié et séparé du
+        // `local` générique pour qu'une règle de sécurité (rétention,
+        // chiffrement du volume, etc.) puisse un jour cibler ce disque
+        // précisément. Jamais public : `visibility: private` + `serve: true`
+        // fait servir les fichiers via une route Laravel dédiée
+        // (`storage.kyc`, signature + expiration obligatoires, voir
+        // `ServeFile`), jamais par un chemin direct. `url` doit être distinct
+        // de celui du disque `local` (sinon Laravel refuse de démarrer :
+        // deux disques servis ne peuvent pas partager le même préfixe
+        // d'URL). Les liens affichés dans l'admin sont générés à la demande
+        // par `ImageEntry::visibility('private')` (voir
+        // `KycDocumentResource`), valables 5 minutes.
+        'kyc' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/kyc'),
+            'url' => '/kyc-storage',
+            'serve' => true,
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        // Attestations d'assurance émises (PDF). Jamais servi par une URL :
+        // le client les télécharge via `GET /insurance/policies/{id}/
+        // attestation` (authentifié, limité à ses propres contrats) et
+        // l'admin depuis `InsurancePolicyResource`.
+        'insurance' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/insurance'),
+            'visibility' => 'private',
+            'throw' => false,
+            'report' => false,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

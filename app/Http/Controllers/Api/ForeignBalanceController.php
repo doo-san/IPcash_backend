@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\FeeScope;
 use App\Enums\TransactionType;
+use App\Exceptions\InsufficientFundsException;
 use App\Http\Controllers\Api\Concerns\HandlesIdempotency;
+use App\Http\Controllers\Api\Concerns\LocksRowsForUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Cashio\ConvertFromXofRequest;
 use App\Http\Requests\Cashio\ConvertToXofRequest;
@@ -33,6 +35,7 @@ use Illuminate\Support\Str;
 class ForeignBalanceController extends Controller
 {
     use HandlesIdempotency;
+    use LocksRowsForUpdate;
 
     public function index(Request $request): AnonymousResourceCollection
     {
@@ -77,28 +80,33 @@ class ForeignBalanceController extends Controller
             return response()->json((new TransactionResource($existing))->resolve(), 202);
         }
 
-        if ($account->balance_xof < $totalXof) {
-            return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde insuffisant pour effectuer cette opération.'], 402);
-        }
-
         $minorUnits = (int) round(($amountXof / (float) $rate->rate_to_xof) * 100);
 
-        $transaction = DB::transaction(function () use ($account, $totalXof, $feeXof, $currencyCode, $minorUnits, $idempotencyKey) {
-            $account->decrement('balance_xof', $totalXof);
-            $balance = $account->foreignBalances()->firstOrCreate(['currency_code' => $currencyCode]);
-            $balance->increment('amount_minor_units', $minorUnits);
+        try {
+            $transaction = DB::transaction(function () use ($account, $totalXof, $feeXof, $currencyCode, $minorUnits, $idempotencyKey) {
+                $account = $this->lockForUpdate($account);
+                if ($account->balance_xof < $totalXof) {
+                    throw new InsufficientFundsException;
+                }
 
-            return $account->transactions()->create([
-                'type' => TransactionType::ForeignExchangeOut,
-                'status' => 'completed',
-                'amount_xof' => -$totalXof,
-                'fee_xof' => $feeXof,
-                'reference' => 'FX-'.strtoupper(Str::random(10)),
-                'foreign_currency_code' => $currencyCode,
-                'foreign_balance_after_minor_units' => $balance->fresh()->amount_minor_units,
-                'idempotency_key' => $idempotencyKey,
-            ]);
-        });
+                $account->decrement('balance_xof', $totalXof);
+                $balance = $account->foreignBalances()->firstOrCreate(['currency_code' => $currencyCode]);
+                $balance->increment('amount_minor_units', $minorUnits);
+
+                return $account->transactions()->create([
+                    'type' => TransactionType::ForeignExchangeOut,
+                    'status' => 'completed',
+                    'amount_xof' => -$totalXof,
+                    'fee_xof' => $feeXof,
+                    'reference' => 'FX-'.strtoupper(Str::random(10)),
+                    'foreign_currency_code' => $currencyCode,
+                    'foreign_balance_after_minor_units' => $balance->fresh()->amount_minor_units,
+                    'idempotency_key' => $idempotencyKey,
+                ]);
+            });
+        } catch (InsufficientFundsException) {
+            return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde insuffisant pour effectuer cette opération.'], 402);
+        }
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }
@@ -118,7 +126,7 @@ class ForeignBalanceController extends Controller
         }
 
         $balance = $account->foreignBalances()->where('currency_code', $currencyCode)->first();
-        if (! $balance || $balance->amount_minor_units < $minorUnits) {
+        if (! $balance) {
             return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde du sous-compte insuffisant.'], 402);
         }
 
@@ -135,21 +143,30 @@ class ForeignBalanceController extends Controller
         $feeXof = FeeRule::computeFor(FeeScope::ForeignExchange, $amountXof);
         $creditedXof = max(0, $amountXof - $feeXof);
 
-        $transaction = DB::transaction(function () use ($account, $creditedXof, $feeXof, $currencyCode, $minorUnits, $balance, $idempotencyKey) {
-            $balance->decrement('amount_minor_units', $minorUnits);
-            $account->increment('balance_xof', $creditedXof);
+        try {
+            $transaction = DB::transaction(function () use ($account, $creditedXof, $feeXof, $currencyCode, $minorUnits, $balance, $idempotencyKey) {
+                $balance = $this->lockForUpdate($balance);
+                if ($balance->amount_minor_units < $minorUnits) {
+                    throw new InsufficientFundsException;
+                }
 
-            return $account->transactions()->create([
-                'type' => TransactionType::ForeignExchangeIn,
-                'status' => 'completed',
-                'amount_xof' => $creditedXof,
-                'fee_xof' => $feeXof,
-                'reference' => 'FX-'.strtoupper(Str::random(10)),
-                'foreign_currency_code' => $currencyCode,
-                'foreign_balance_after_minor_units' => $balance->fresh()->amount_minor_units,
-                'idempotency_key' => $idempotencyKey,
-            ]);
-        });
+                $balance->decrement('amount_minor_units', $minorUnits);
+                $account->increment('balance_xof', $creditedXof);
+
+                return $account->transactions()->create([
+                    'type' => TransactionType::ForeignExchangeIn,
+                    'status' => 'completed',
+                    'amount_xof' => $creditedXof,
+                    'fee_xof' => $feeXof,
+                    'reference' => 'FX-'.strtoupper(Str::random(10)),
+                    'foreign_currency_code' => $currencyCode,
+                    'foreign_balance_after_minor_units' => $balance->fresh()->amount_minor_units,
+                    'idempotency_key' => $idempotencyKey,
+                ]);
+            });
+        } catch (InsufficientFundsException) {
+            return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde du sous-compte insuffisant.'], 402);
+        }
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }
@@ -181,7 +198,7 @@ class ForeignBalanceController extends Controller
         }
 
         $balance = $account->foreignBalances()->where('currency_code', $currencyCode)->first();
-        if (! $balance || $balance->amount_minor_units < $minorUnits) {
+        if (! $balance) {
             return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde du sous-compte insuffisant.'], 402);
         }
 
@@ -193,36 +210,45 @@ class ForeignBalanceController extends Controller
             return response()->json((new TransactionResource($existing))->resolve(), 202);
         }
 
-        $transaction = DB::transaction(function () use ($account, $recipient, $currencyCode, $minorUnits, $balance, $idempotencyKey) {
-            $balance->decrement('amount_minor_units', $minorUnits);
-            $recipientBalance = $recipient->foreignBalances()->firstOrCreate(['currency_code' => $currencyCode]);
-            $recipientBalance->increment('amount_minor_units', $minorUnits);
+        try {
+            $transaction = DB::transaction(function () use ($account, $recipient, $currencyCode, $minorUnits, $balance, $idempotencyKey) {
+                $balance = $this->lockForUpdate($balance);
+                if ($balance->amount_minor_units < $minorUnits) {
+                    throw new InsufficientFundsException;
+                }
 
-            $reference = 'FXSEND-'.strtoupper(Str::random(10));
+                $balance->decrement('amount_minor_units', $minorUnits);
+                $recipientBalance = $recipient->foreignBalances()->firstOrCreate(['currency_code' => $currencyCode]);
+                $recipientBalance->increment('amount_minor_units', $minorUnits);
 
-            $recipient->transactions()->create([
-                'type' => TransactionType::ForeignExchangeIn,
-                'status' => 'completed',
-                'amount_xof' => 0,
-                'counterparty_name' => $account->fullName() ?? $account->phone_number,
-                'counterparty_phone_number' => $account->phone_number,
-                'reference' => "{$reference}-R",
-                'foreign_currency_code' => $currencyCode,
-                'foreign_balance_after_minor_units' => $recipientBalance->fresh()->amount_minor_units,
-            ]);
+                $reference = 'FXSEND-'.strtoupper(Str::random(10));
 
-            return $account->transactions()->create([
-                'type' => TransactionType::ForeignTransferOut,
-                'status' => 'completed',
-                'amount_xof' => 0,
-                'counterparty_name' => $recipient->fullName() ?? $recipient->phone_number,
-                'counterparty_phone_number' => $recipient->phone_number,
-                'reference' => $reference,
-                'foreign_currency_code' => $currencyCode,
-                'foreign_balance_after_minor_units' => $balance->fresh()->amount_minor_units,
-                'idempotency_key' => $idempotencyKey,
-            ]);
-        });
+                $recipient->transactions()->create([
+                    'type' => TransactionType::ForeignExchangeIn,
+                    'status' => 'completed',
+                    'amount_xof' => 0,
+                    'counterparty_name' => $account->fullName() ?? $account->phone_number,
+                    'counterparty_phone_number' => $account->phone_number,
+                    'reference' => "{$reference}-R",
+                    'foreign_currency_code' => $currencyCode,
+                    'foreign_balance_after_minor_units' => $recipientBalance->fresh()->amount_minor_units,
+                ]);
+
+                return $account->transactions()->create([
+                    'type' => TransactionType::ForeignTransferOut,
+                    'status' => 'completed',
+                    'amount_xof' => 0,
+                    'counterparty_name' => $recipient->fullName() ?? $recipient->phone_number,
+                    'counterparty_phone_number' => $recipient->phone_number,
+                    'reference' => $reference,
+                    'foreign_currency_code' => $currencyCode,
+                    'foreign_balance_after_minor_units' => $balance->fresh()->amount_minor_units,
+                    'idempotency_key' => $idempotencyKey,
+                ]);
+            });
+        } catch (InsufficientFundsException) {
+            return response()->json(['code' => 'INSUFFICIENT_FUNDS', 'message' => 'Solde du sous-compte insuffisant.'], 402);
+        }
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }

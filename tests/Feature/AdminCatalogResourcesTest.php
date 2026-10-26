@@ -11,6 +11,7 @@ use App\Models\FinancialInstitution;
 use App\Models\PromoCode;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Test de fumée pour les catalogues ajoutés lors de l'audit des parties de
@@ -25,7 +26,7 @@ class AdminCatalogResourcesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create();
+        $this->admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
     }
 
     public function test_fee_rule_pages_load_and_percent_fee_computation_is_correct(): void

@@ -11,6 +11,7 @@ use App\Models\ChatbotAnswer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Exigence produit : « je veux des boutons de recherche » — chaque
@@ -25,7 +26,7 @@ class AdminSearchTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create();
+        $this->admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
     }
 
     public function test_cards_are_searchable_by_last4(): void

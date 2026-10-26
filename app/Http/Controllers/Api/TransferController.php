@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Enums\FeeScope;
 use App\Enums\KycVerificationStatus;
 use App\Enums\TransactionType;
+use App\Exceptions\InsufficientFundsException;
 use App\Http\Controllers\Api\Concerns\HandlesIdempotency;
+use App\Http\Controllers\Api\Concerns\LocksRowsForUpdate;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Transfer\P2pTransferRequest;
 use App\Http\Requests\Transfer\QuoteRequest;
@@ -21,6 +23,7 @@ use Illuminate\Support\Str;
 class TransferController extends Controller
 {
     use HandlesIdempotency;
+    use LocksRowsForUpdate;
 
     public function quote(QuoteRequest $request): JsonResponse
     {
@@ -84,41 +87,50 @@ class TransferController extends Controller
             return response()->json((new TransactionResource($existing))->resolve(), 202);
         }
 
-        if ($account->balance_xof < $totalXof) {
+        $reference = 'TRF-'.strtoupper(Str::random(10));
+
+        try {
+            $transaction = DB::transaction(function () use ($account, $recipient, $amountXof, $feeXof, $totalXof, $data, $reference, $idempotencyKey) {
+                // Relu sous verrou juste avant de contrôler le solde : un
+                // transfert concurrent déjà en cours sur ce compte doit être
+                // pris en compte, pas la valeur lue avant d'entrer ici (voir
+                // LocksRowsForUpdate).
+                $account = $this->lockForUpdate($account);
+                if ($account->balance_xof < $totalXof) {
+                    throw new InsufficientFundsException;
+                }
+
+                $account->decrement('balance_xof', $totalXof);
+                $recipient->increment('balance_xof', $amountXof);
+
+                $recipient->transactions()->create([
+                    'type' => TransactionType::TransferIn,
+                    'status' => 'completed',
+                    'amount_xof' => $amountXof,
+                    'counterparty_name' => $account->fullName() ?? $account->phone_number,
+                    'counterparty_phone_number' => $account->phone_number,
+                    'note' => $data['note'] ?? null,
+                    'reference' => "{$reference}-R",
+                ]);
+
+                return $account->transactions()->create([
+                    'type' => TransactionType::TransferOut,
+                    'status' => 'completed',
+                    'amount_xof' => -$totalXof,
+                    'fee_xof' => $feeXof,
+                    'counterparty_name' => $recipient->fullName() ?? $recipient->phone_number,
+                    'counterparty_phone_number' => $recipient->phone_number,
+                    'note' => $data['note'] ?? null,
+                    'reference' => $reference,
+                    'idempotency_key' => $idempotencyKey,
+                ]);
+            });
+        } catch (InsufficientFundsException) {
             return response()->json([
                 'code' => 'INSUFFICIENT_FUNDS',
                 'message' => 'Solde insuffisant pour effectuer cette opération.',
             ], 402);
         }
-
-        $reference = 'TRF-'.strtoupper(Str::random(10));
-
-        $transaction = DB::transaction(function () use ($account, $recipient, $amountXof, $feeXof, $totalXof, $data, $reference, $idempotencyKey) {
-            $account->decrement('balance_xof', $totalXof);
-            $recipient->increment('balance_xof', $amountXof);
-
-            $recipient->transactions()->create([
-                'type' => TransactionType::TransferIn,
-                'status' => 'completed',
-                'amount_xof' => $amountXof,
-                'counterparty_name' => $account->fullName() ?? $account->phone_number,
-                'counterparty_phone_number' => $account->phone_number,
-                'note' => $data['note'] ?? null,
-                'reference' => "{$reference}-R",
-            ]);
-
-            return $account->transactions()->create([
-                'type' => TransactionType::TransferOut,
-                'status' => 'completed',
-                'amount_xof' => -$totalXof,
-                'fee_xof' => $feeXof,
-                'counterparty_name' => $recipient->fullName() ?? $recipient->phone_number,
-                'counterparty_phone_number' => $recipient->phone_number,
-                'note' => $data['note'] ?? null,
-                'reference' => $reference,
-                'idempotency_key' => $idempotencyKey,
-            ]);
-        });
 
         return response()->json((new TransactionResource($transaction))->resolve(), 202);
     }

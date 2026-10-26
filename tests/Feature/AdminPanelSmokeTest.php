@@ -16,6 +16,7 @@ use App\Models\MobileMoneyProvider;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Test de fumée permanent : garantit qu'aucune ressource Filament ne
@@ -32,7 +33,7 @@ class AdminPanelSmokeTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->admin = User::factory()->create();
+        $this->admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
     }
 
     public function test_dashboard_loads(): void

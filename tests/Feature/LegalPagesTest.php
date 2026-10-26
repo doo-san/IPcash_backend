@@ -7,6 +7,7 @@ use App\Models\LegalPage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 // Pages légales (Conditions d'utilisation, Confidentialité...) — voir
@@ -37,7 +38,7 @@ class LegalPagesTest extends TestCase
 
     public function test_admin_can_create_a_new_legal_page_and_it_appears_in_the_footer(): void
     {
-        $admin = User::factory()->create();
+        $admin = tap(User::factory()->create(), fn ($u) => $u->assignRole(Role::findOrCreate('super_admin')));
 
         Livewire::actingAs($admin)
             ->test(LegalPageResource\Pages\ManageLegalPages::class)

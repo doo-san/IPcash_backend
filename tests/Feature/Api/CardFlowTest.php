@@ -152,6 +152,38 @@ class CardFlowTest extends TestCase
         $this->assertSame(15000, $account->fresh()->ephemeralCard->balance_xof);
     }
 
+    public function test_ephemeral_card_recharge_exceeding_main_balance_is_rejected(): void
+    {
+        $account = $this->account(1000);
+        $card = $account->cards()->create(['last4' => '4242', 'expiry_month' => 9, 'expiry_year' => 2028]);
+        $this->postJson("/api/cards/{$card->id}/ephemeral-card", ['pin' => '123456'], $this->idempotentHeader($account))
+            ->assertStatus(202);
+        auth()->forgetGuards();
+
+        $this->postJson('/api/cards/ephemeral-card/recharge', ['amountXof' => 5000], $this->idempotentHeader($account))
+            ->assertStatus(402);
+
+        $this->assertSame(1000, $account->fresh()->balance_xof);
+    }
+
+    public function test_ephemeral_card_transfer_out_exceeding_its_balance_is_rejected(): void
+    {
+        $account = $this->account(50000);
+        $card = $account->cards()->create(['last4' => '4242', 'expiry_month' => 9, 'expiry_year' => 2028]);
+        $this->postJson("/api/cards/{$card->id}/ephemeral-card", ['pin' => '123456'], $this->idempotentHeader($account))
+            ->assertStatus(202);
+        auth()->forgetGuards();
+
+        $this->postJson('/api/cards/ephemeral-card/recharge', ['amountXof' => 1000], $this->idempotentHeader($account))
+            ->assertStatus(202);
+        auth()->forgetGuards();
+
+        $this->postJson('/api/cards/ephemeral-card/transfer-out', ['amountXof' => 5000], $this->idempotentHeader($account))
+            ->assertStatus(402);
+
+        $this->assertSame(1000, $account->fresh()->ephemeralCard->balance_xof);
+    }
+
     public function test_destroy_ephemeral_card_refunds_remaining_balance(): void
     {
         $account = $this->account(50000);
@@ -274,6 +306,20 @@ class CardFlowTest extends TestCase
 
         $this->postJson("/api/cards/{$card->id}/recharge", ['amountXof' => 5000], $this->idempotentHeader($account))
             ->assertStatus(402);
+    }
+
+    public function test_card_transfer_out_exceeding_card_balance_is_rejected(): void
+    {
+        $account = $this->account(50000);
+        $card = $account->cards()->create([
+            'last4' => '4242', 'expiry_month' => 9, 'expiry_year' => 2028, 'balance_xof' => 1000,
+        ]);
+
+        $this->postJson("/api/cards/{$card->id}/transfer-out", ['amountXof' => 5000], $this->idempotentHeader($account))
+            ->assertStatus(402);
+
+        $this->assertSame(50000, $account->fresh()->balance_xof);
+        $this->assertSame(1000, $card->fresh()->balance_xof);
     }
 
     public function test_card_transactions_are_scoped_to_that_card(): void

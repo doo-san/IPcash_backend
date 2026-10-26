@@ -33,10 +33,15 @@ Route::prefix('auth')->group(function () {
         ->middleware('throttle:6,1');
     Route::post('otp/verify', [AuthController::class, 'verifyOtp']);
     Route::post('pin', [AuthController::class, 'createPin'])
-        ->middleware('session.token');
+        ->middleware(['throttle:10,1', 'session.token']);
     Route::post('login', [AuthController::class, 'login'])
         ->middleware('throttle:10,1');
-    Route::post('refresh', [AuthController::class, 'refresh']);
+    // Même limite que `login` : l'échange de refresh token fait, comme lui,
+    // un scan bcrypt linéaire sur toutes les lignes valides (voir
+    // `AuthController::refresh()`) — sans throttle, un essai en masse de
+    // jetons devinés serait aussi un vecteur de déni de service.
+    Route::post('refresh', [AuthController::class, 'refresh'])
+        ->middleware('throttle:10,1');
 
     Route::middleware(['auth:sanctum', 'account.notBlocked', 'maintenance'])->group(function () {
         Route::post('register/personal-info', [AuthController::class, 'personalInfo']);
@@ -143,6 +148,14 @@ Route::middleware(['auth:sanctum', 'account.notBlocked', 'maintenance'])->group(
     Route::prefix('insurance')->middleware('feature:insurance')->group(function () {
         Route::get('plans', [InsuranceController::class, 'plans']);
         Route::post('purchase', [InsuranceController::class, 'purchase'])->middleware('idempotency');
+    });
+
+    // Hors `feature:insurance` : fermer les nouvelles souscriptions ne doit
+    // jamais empêcher un client assuré de retrouver son attestation.
+    Route::prefix('insurance/policies')->group(function () {
+        Route::get('/', [InsuranceController::class, 'policies']);
+        Route::get('{id}', [InsuranceController::class, 'show'])->whereUuid('id');
+        Route::get('{id}/attestation', [InsuranceController::class, 'attestation'])->whereUuid('id');
     });
 
     Route::prefix('esim')->middleware('feature:esim')->group(function () {

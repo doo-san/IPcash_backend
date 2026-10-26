@@ -72,6 +72,24 @@ return [
             'report' => false,
         ],
 
+        // Sauvegardes chiffrées (config/backup.php). En production, à placer
+        // hors du serveur sauvegardé : BACKUP_DISK_DRIVER=s3 + BACKUP_S3_*.
+        'backups' => env('BACKUP_DISK_DRIVER', 'local') === 's3' ? [
+            'driver' => 's3',
+            'key' => env('BACKUP_S3_KEY'),
+            'secret' => env('BACKUP_S3_SECRET'),
+            'region' => env('BACKUP_S3_REGION'),
+            'bucket' => env('BACKUP_S3_BUCKET'),
+            'endpoint' => env('BACKUP_S3_ENDPOINT'),
+            'use_path_style_endpoint' => env('BACKUP_S3_PATH_STYLE', false),
+            'throw' => true,
+        ] : [
+            'driver' => 'local',
+            'root' => storage_path('app/backups'),
+            'visibility' => 'private',
+            'throw' => true,
+        ],
+
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),

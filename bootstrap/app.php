@@ -23,6 +23,12 @@ return Application::configure(basePath: dirname(__DIR__))
         // Voir FinalizeWavePayouts : l'API Payout de Wave n'a pas de
         // webhook documenté, contrairement à Checkout.
         $schedule->command('wave:finalize-payouts')->everyFiveMinutes();
+
+        // Sauvegardes : voir config/backup.php et VerifyBackupRestore.
+        $schedule->command('backup:clean')->dailyAt('01:00');
+        $schedule->command('backup:run')->dailyAt('01:30');
+        $schedule->command('backup:monitor')->dailyAt('06:00');
+        $schedule->command('backup:verify-restore')->weeklyOn(0, '05:00');
     })
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([

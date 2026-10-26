@@ -7,6 +7,7 @@ use Anthropic\Core\Exceptions\APIStatusException;
 use App\Enums\ChatRole;
 use App\Models\Account;
 use App\Models\FaqEntry;
+use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
@@ -28,6 +29,10 @@ class AiSupportChatService
 
     private const MAX_REPLY_TOKENS = 1024;
 
+    private const CONNECT_TIMEOUT_SECONDS = 3;
+
+    private const TIMEOUT_SECONDS = 12;
+
     private ?Client $client;
 
     private AiSupportBudget $budget;
@@ -36,7 +41,20 @@ class AiSupportChatService
     {
         $apiKey = config('services.anthropic.key');
 
-        $this->client = $client ?? ($apiKey ? new Client(apiKey: $apiKey) : null);
+        $this->client = $client ?? ($apiKey ? new Client(
+            apiKey: $apiKey,
+            requestOptions: [
+                // Le SDK n'applique aucun délai lui-même : c'est le client
+                // HTTP fourni qui le fait. Sous les 15 s de l'app ; un
+                // échec bascule sur les réponses par mot-clé, d'où aucune
+                // relance.
+                'transporter' => new GuzzleClient([
+                    'connect_timeout' => self::CONNECT_TIMEOUT_SECONDS,
+                    'timeout' => self::TIMEOUT_SECONDS,
+                ]),
+                'maxRetries' => 0,
+            ],
+        ) : null);
         $this->budget = $budget ?? new AiSupportBudget;
     }
 

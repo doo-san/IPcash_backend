@@ -3,8 +3,9 @@
 namespace App\Services\Wave;
 
 use App\Models\MobileMoneyProvider;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 
 // Client pour les API Checkout (dépôt) et Payout (retrait) de Wave — voir
 // docs.wave.com/checkout et docs.wave.com/payout. Contrairement à OM Pay
@@ -16,6 +17,12 @@ use Illuminate\Support\Str;
 // avec la clé, pas un mot de passe classique).
 class WaveClient
 {
+    // Sous le délai de réception de l'app (15 s) pour qu'elle reçoive une
+    // réponse plutôt que d'expirer la première.
+    private const CONNECT_TIMEOUT_SECONDS = 5;
+
+    private const TIMEOUT_SECONDS = 12;
+
     public function __construct(private readonly MobileMoneyProvider $provider) {}
 
     /**
@@ -35,7 +42,7 @@ class WaveClient
             'error_url' => $errorUrl,
         ], JSON_THROW_ON_ERROR);
 
-        $response = Http::baseUrl($this->baseUrl())
+        $response = $this->http()
             ->withToken((string) $this->provider->api_key)
             ->withHeaders(['Wave-Signature' => WaveSignature::header((string) $this->provider->api_secret, $body)])
             ->withBody($body, 'application/json')
@@ -63,7 +70,10 @@ class WaveClient
     // `wave:finalize-payouts` qui interroge `getPayoutStatus` en relais).
     //
     // @return array{id: string, status: string}
-    public function sendPayout(int $amountXof, string $mobile): array
+    // `$idempotencyKey` doit être stable pour une même opération (l'id de la
+    // transaction) : un rejeu après une issue incertaine ne paie jamais deux
+    // fois.
+    public function sendPayout(int $amountXof, string $mobile, string $idempotencyKey): array
     {
         $body = json_encode([
             'currency' => 'XOF',
@@ -71,15 +81,22 @@ class WaveClient
             'mobile' => $mobile,
         ], JSON_THROW_ON_ERROR);
 
-        $response = Http::baseUrl($this->baseUrl())
-            ->withToken((string) $this->provider->api_key)
-            ->withHeaders([
-                'Wave-Signature' => WaveSignature::header((string) $this->provider->api_secret, $body),
-                'Idempotency-Key' => (string) Str::uuid(),
-            ])
-            ->withBody($body, 'application/json')
-            ->post('/v1/payout');
+        try {
+            $response = $this->http()
+                ->withToken((string) $this->provider->api_key)
+                ->withHeaders([
+                    'Wave-Signature' => WaveSignature::header((string) $this->provider->api_secret, $body),
+                    'Idempotency-Key' => $idempotencyKey,
+                ])
+                ->withBody($body, 'application/json')
+                ->post('/v1/payout');
+        } catch (ConnectionException $e) {
+            throw new WavePayoutUncertainException('Wave Payout sans réponse : '.$e->getMessage(), previous: $e);
+        }
 
+        if ($response->serverError()) {
+            throw new WavePayoutUncertainException('Wave Payout en erreur serveur ('.$response->status().').');
+        }
         if ($response->failed()) {
             throw new WaveException(
                 'Wave Payout a échoué ('.$response->status().'): '.$this->extractErrorDetail($response->json()),
@@ -89,7 +106,7 @@ class WaveClient
         $id = $response->json('id');
         $status = $response->json('status');
         if (! is_string($id) || ! is_string($status)) {
-            throw new WaveException('Wave Payout : réponse sans id/status exploitable.');
+            throw new WavePayoutUncertainException('Wave Payout : réponse sans id/status exploitable.');
         }
 
         return ['id' => $id, 'status' => $status];
@@ -97,7 +114,7 @@ class WaveClient
 
     public function getPayoutStatus(string $payoutId): string
     {
-        $response = Http::baseUrl($this->baseUrl())
+        $response = $this->http()
             ->withToken((string) $this->provider->api_key)
             ->withHeaders(['Wave-Signature' => WaveSignature::header((string) $this->provider->api_secret, '')])
             ->get("/v1/payout/{$payoutId}");
@@ -127,7 +144,7 @@ class WaveClient
     // @return array{paymentStatus: string, checkoutStatus: string, lastPaymentErrorMessage: ?string}
     public function getCheckoutSessionStatus(string $sessionId): array
     {
-        $response = Http::baseUrl($this->baseUrl())
+        $response = $this->http()
             ->withToken((string) $this->provider->api_key)
             ->withHeaders(['Wave-Signature' => WaveSignature::header((string) $this->provider->api_secret, '')])
             ->get("/v1/checkout/sessions/{$sessionId}");
@@ -171,5 +188,12 @@ class WaveClient
         }
 
         return $message;
+    }
+
+    private function http(): PendingRequest
+    {
+        return Http::baseUrl($this->baseUrl())
+            ->connectTimeout(self::CONNECT_TIMEOUT_SECONDS)
+            ->timeout(self::TIMEOUT_SECONDS);
     }
 }

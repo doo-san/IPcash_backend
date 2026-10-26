@@ -3,6 +3,7 @@
 namespace App\Services\OrangeMoney;
 
 use App\Models\MobileMoneyProvider;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
@@ -20,6 +21,11 @@ use Illuminate\Support\Facades\Http;
 // remontée telle quelle via OrangeMoneyException plutôt que masquée.
 class OrangeMoneyClient
 {
+    // Sous le délai de réception de l'app (15 s).
+    private const CONNECT_TIMEOUT_SECONDS = 5;
+
+    private const TIMEOUT_SECONDS = 12;
+
     public function __construct(private readonly MobileMoneyProvider $provider) {}
 
     public function preparePayment(
@@ -29,7 +35,7 @@ class OrangeMoneyClient
         string $cancelUrl,
         string $callbackUrl,
     ): string {
-        $response = Http::baseUrl($this->baseUrl())
+        $response = $this->http()
             ->withToken($this->accessToken())
             ->acceptJson()
             ->post('/v1/onlinePayment/prepare', [
@@ -66,7 +72,7 @@ class OrangeMoneyClient
             "orange_money:access_token:{$this->provider->id}",
             now()->addSeconds(270),
             function (): string {
-                $response = Http::baseUrl($this->baseUrl())
+                $response = $this->http()
                     ->asForm()
                     ->withBasicAuth((string) $this->provider->api_key, (string) $this->provider->api_secret)
                     ->post('/oauth/v1/token', ['grant_type' => 'client_credentials']);
@@ -98,5 +104,12 @@ class OrangeMoneyClient
     private function extractErrorDetail(?array $body): string
     {
         return $body['detail'] ?? $body['error_description'] ?? $body['error'] ?? 'erreur inconnue';
+    }
+
+    private function http(): PendingRequest
+    {
+        return Http::baseUrl($this->baseUrl())
+            ->connectTimeout(self::CONNECT_TIMEOUT_SECONDS)
+            ->timeout(self::TIMEOUT_SECONDS);
     }
 }

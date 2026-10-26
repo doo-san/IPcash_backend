@@ -11,6 +11,8 @@ use App\Models\Transaction;
 use App\Services\OrangeMoney\OrangeMoneyWebhookToken;
 use App\Services\Wave\WaveSignature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
@@ -497,6 +499,65 @@ class CashioFlowTest extends TestCase
         $this->assertSame('pending', $response['status']);
         $this->assertSame(10000, $account->fresh()->balance_xof);
         $this->assertSame('pt-3', Transaction::first()->provider_reference);
+    }
+
+    public function test_a_wave_payout_without_response_stays_pending_never_failed(): void
+    {
+        Http::fake([
+            'api.wave.com/v1/payout' => fn () => throw new ConnectionException('Operation timed out'),
+        ]);
+        $provider = $this->waveProvider();
+        $account = $this->account('+221771111111', 10000);
+
+        $response = $this->postJson('/api/cashout', [
+            'providerId' => $provider->id, 'amountXof' => 4000, 'pin' => '123456',
+        ], $this->authHeader($account))->assertStatus(202)->json();
+
+        $this->assertSame('pending', $response['status']);
+        $this->assertNull(Transaction::first()->failure_reason);
+        $this->assertSame(10000, $account->fresh()->balance_xof);
+    }
+
+    public function test_a_wave_payout_server_error_stays_pending_never_failed(): void
+    {
+        Http::fake(['api.wave.com/v1/payout' => Http::response(['message' => 'oops'], 503)]);
+        $provider = $this->waveProvider();
+        $account = $this->account('+221771111111', 10000);
+
+        $response = $this->postJson('/api/cashout', [
+            'providerId' => $provider->id, 'amountXof' => 4000, 'pin' => '123456',
+        ], $this->authHeader($account))->assertStatus(202)->json();
+
+        $this->assertSame('pending', $response['status']);
+        $this->assertSame(10000, $account->fresh()->balance_xof);
+    }
+
+    public function test_a_wave_payout_rejected_by_wave_is_failed(): void
+    {
+        Http::fake(['api.wave.com/v1/payout' => Http::response(['code' => 'invalid-mobile'], 400)]);
+        $provider = $this->waveProvider();
+        $account = $this->account('+221771111111', 10000);
+
+        $response = $this->postJson('/api/cashout', [
+            'providerId' => $provider->id, 'amountXof' => 4000, 'pin' => '123456',
+        ], $this->authHeader($account))->assertStatus(202)->json();
+
+        $this->assertSame('failed', $response['status']);
+        $this->assertSame(10000, $account->fresh()->balance_xof);
+    }
+
+    public function test_the_wave_payout_idempotency_key_is_the_transaction_id(): void
+    {
+        Http::fake(['api.wave.com/v1/payout' => Http::response(['id' => 'pt-9', 'status' => 'processing'])]);
+        $provider = $this->waveProvider();
+        $account = $this->account('+221771111111', 10000);
+
+        $this->postJson('/api/cashout', [
+            'providerId' => $provider->id, 'amountXof' => 4000, 'pin' => '123456',
+        ], $this->authHeader($account))->assertStatus(202);
+
+        Http::assertSent(fn (Request $request) => $request->url() === 'https://api.wave.com/v1/payout'
+            && $request->header('Idempotency-Key')[0] === Transaction::first()->id);
     }
 
     public function test_finalize_wave_payouts_command_completes_a_processing_transaction(): void

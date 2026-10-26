@@ -21,6 +21,7 @@ use App\Models\Transaction;
 use App\Services\OrangeMoney\OrangeMoneyClient;
 use App\Services\OrangeMoney\OrangeMoneyWebhookToken;
 use App\Services\Wave\WaveClient;
+use App\Services\Wave\WavePayoutUncertainException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -366,7 +367,19 @@ class CashioController extends Controller
             $result = (new WaveClient($provider))->sendPayout(
                 amountXof: $amountXof,
                 mobile: $account->phone_number,
+                idempotencyKey: $transaction->id,
             );
+        } catch (WavePayoutUncertainException $e) {
+            // Wave a peut-être payé : jamais « échoué » (règle 3). Reste
+            // `pending`, sans débit, jusqu'au rapprochement manuel
+            // (TransactionResource › Résoudre) — un rejeu avec la même clé
+            // d'idempotence ne paierait pas deux fois.
+            logger()->error('[wave] payout à l\'issue inconnue — rapprochement manuel requis', [
+                'transaction_id' => $transaction->id,
+                'reason' => $e->getMessage(),
+            ]);
+
+            return response()->json((new TransactionResource($transaction->fresh()))->resolve(), 202);
         } catch (Throwable $e) {
             $transaction->update(['status' => 'failed', 'failure_reason' => $e->getMessage()]);
 
